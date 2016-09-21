@@ -1,4 +1,6 @@
 lazy val circeVersion = "0.5.1"
+lazy val utilVersion = "6.37.0"
+lazy val configVersion = "1.3.0"
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -26,7 +28,8 @@ lazy val etl = project.in(file("."))
       "io.circe" %% "circe-generic",
       "io.circe" %% "circe-parser"
     ).map(_ % circeVersion) ++ Seq(
-      "com.twitter" %% "util-core" % "6.34.0"
+      "com.twitter" %% "util-core" % utilVersion,
+      "com.typesafe" % "config" % configVersion
     ),
     scalacOptions ++= compilerOptions
   )
