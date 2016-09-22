@@ -23,7 +23,6 @@ namespace InGameProbabilitiesPlugin.InjectionManager
 
             if (processes.Length != 1)
             {
-                Debugger.Break();
                 return false;
             }
 

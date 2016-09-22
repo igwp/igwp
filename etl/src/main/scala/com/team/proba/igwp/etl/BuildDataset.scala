@@ -28,7 +28,7 @@ object BuildDataset {
       "towerKillsTeam1,towerKillsTeam2,goldTeam1,goldTeam2," +
       "killsTeam1,killsTeam2,deathsTeam1,deathsTeam2,assistsTeam1,assistsTeam2," +
       "champLvlsTeam1,champLvlsTeam2,minionKillsTeam1,minionKillsTeam2," +
-      "minLeagueTeam1,minLeagueTeam2,maxLeagueTeam1,maxLeagueTeam2,winner"
+      "minLeagueTeam1,minLeagueTeam2,maxLeagueTeam1,maxLeagueTeam2,winner\n"
     fileWriter.write(headerLine)
 
     val timer = new JavaTimer(isDaemon = false)
