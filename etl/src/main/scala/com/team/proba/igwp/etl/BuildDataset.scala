@@ -3,7 +3,7 @@ package com.team.proba.igwp.etl
 import java.io.FileWriter
 
 import cats.data.Xor
-import com.team.proba.igwp.etl.model.MatchDetail
+import com.team.proba.igwp.etl.model._
 import com.twitter.util.{Duration, TimerTask, JavaTimer}
 import com.typesafe.config.ConfigFactory
 import io.circe.generic.auto._
@@ -22,11 +22,11 @@ object BuildDataset {
     val urlsQeueue = mutable.Queue(gameIds.map(urlTemplate.format(_)).toSeq: _*)
     require(urlsQeueue.nonEmpty, "there should be URLs to query")
 
-    val fileWriter = new FileWriter("sfCrime/src/main/resources/matches.json")
+    val fileWriter = new FileWriter("src/main/resources/matches.json")
     fileWriter.write("[\n")
 
     val timer = new JavaTimer(isDaemon = false)
-    lazy val task: TimerTask = timer.schedule(Duration.fromMilliseconds(50)) {
+    lazy val task: TimerTask = timer.schedule(Duration.fromMilliseconds(1000)) {
       val url = urlsQeueue.dequeue()
       val matchDetail = decode[MatchDetail](Source.fromURL(url).mkString)
       matchDetail match {
