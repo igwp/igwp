@@ -26,7 +26,7 @@ object BuildDataset {
     fileWriter.write("[\n")
 
     val timer = new JavaTimer(isDaemon = false)
-    lazy val task: TimerTask = timer.schedule(Duration.fromMilliseconds(1000)) {
+    lazy val task: TimerTask = timer.schedule(Duration.fromSeconds(1)) {
       val url = urlsQeueue.dequeue()
       val matchDetail = decode[MatchDetail](Source.fromURL(url).mkString)
       matchDetail match {
