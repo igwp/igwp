@@ -144,7 +144,7 @@ object model {
           } else {
             val side = (botRight.x - topLeft.x) * (evt.position.y - topLeft.y) -
               (evt.position.x - topLeft.x) * (botRight.y - topLeft.y)
-            if (side > 0) (1, 0)
+            if (side < 0) (1, 0)
             else (0, 1)
           }
         }.foldLeft((0, 0))((s, e) => (s._1 + e._1, s._2 + e._2))
@@ -160,21 +160,21 @@ object model {
         val exWithDragonKills = exWithTowerKills.copy(
           dragonKillsTeam1 = exWithTowerKills.dragonKillsTeam1 + dragonKillsPerTeam._1,
           dragonKillsTeam2 = exWithTowerKills.dragonKillsTeam2 + dragonKillsPerTeam._2)
-        val baronKillsPerTeam = monsterKills.filter(_.monsterType == "DRAGON").map { evt =>
+        val baronKillsPerTeam = monsterKills.filter(_.monsterType == "BARON_NASHOR").map { evt =>
           if (evt.killerId <= 5) (1, 0)
           else (0, 1)
         }.foldLeft((0, 0))((s, e) => (s._1 + e._1, s._2 + e._2))
         val exWithBaronKills = exWithDragonKills.copy(
-          baronKillsTeam1 = exWithDragonKills.dragonKillsTeam1 + baronKillsPerTeam._1,
-          baronKillsTeam2 = exWithDragonKills.dragonKillsTeam2 + baronKillsPerTeam._2)
+          baronKillsTeam1 = exWithDragonKills.baronKillsTeam1 + baronKillsPerTeam._1,
+          baronKillsTeam2 = exWithDragonKills.baronKillsTeam2 + baronKillsPerTeam._2)
 
         val sortedPFs = f.participantFrames.toSeq.sortBy(_._1)
         exWithBaronKills.copy(
           gameTimeMS = f.gameTimeMS,
           goldTeam1 = f.participantFrames.filter(_._1 <= 5).map(_._2.totalGold).sum,
           goldTeam2 = f.participantFrames.filter(_._1 > 5).map(_._2.totalGold).sum,
-          champLevels = sortedPFs.map(_._2.level).toArray,
-          minionKills = sortedPFs.map(_._2.minionsKilled).toArray
+          champLevels = sortedPFs.map(_._2.level),
+          minionKills = sortedPFs.map(_._2.minionsKilled)
         )
       }
     }
