@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InGameProbabilitiesPlugin", "InGameProbabilitiesPlugin\InGameProbabilitiesPlugin.csproj", "{4C0EE500-949A-496D-AB3D-C3838BFAF36D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClrInjectionLib", "ClrInjectionLib\ClrInjectionLib.vcxproj", "{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Debug|x64.ActiveCfg = Debug|x64
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Debug|x64.Build.0 = Debug|x64
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Debug|x86.ActiveCfg = Debug|x86
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Debug|x86.Build.0 = Debug|x86
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Release|x64.ActiveCfg = Release|x64
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Release|x64.Build.0 = Release|x64
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Release|x86.ActiveCfg = Release|x86
+		{4C0EE500-949A-496D-AB3D-C3838BFAF36D}.Release|x86.Build.0 = Release|x86
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Debug|x64.ActiveCfg = Debug|x64
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Debug|x64.Build.0 = Debug|x64
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Debug|x86.ActiveCfg = Debug|Win32
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Debug|x86.Build.0 = Debug|Win32
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Release|x64.ActiveCfg = Release|x64
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Release|x64.Build.0 = Release|x64
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Release|x86.ActiveCfg = Release|Win32
+		{A1596B17-CDEE-4E18-ABD5-AD6C2DC43AFA}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
