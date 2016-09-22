@@ -82,4 +82,50 @@ object model {
       } yield Participant(hast, cid, pid)
     }
   }
+
+  case class Team(
+    teamId: Int,
+    winner: Boolean
+  )
+  object Team {
+    implicit val decode: Decoder[Team] = Decoder.instance { c =>
+      for {
+        tid <- c.downField("teamId").as[Int]
+        w <- c.downField("winner").as[Boolean]
+      } yield Team(tid, w)
+    }
+  }
+
+  case class MatchDetail(
+    participants: Seq[Participant],
+    timeline: Timeline,
+    winner: Int
+  )
+  object MatchDetail {
+    implicit val decode: Decoder[MatchDetail] = Decoder.instance { c =>
+      for {
+        ps <- c.downField("participants").as[Seq[Participant]]
+        t <- c.downField("timeline").as[Timeline]
+        ts <- c.downField("teams").as[Seq[Team]]
+      } yield MatchDetail(ps, t, ts.filter(_.winner).map(_.teamId).head)
+    }
+  }
+
+  case class Example(
+    gameTimeMS: Long,
+    championIds: Array[Int],
+    baronKillsTeam1: Int,
+    baronKillsTeam2: Int,
+    dragonKillsTeam1: Int,
+    dragonKillsTeam2: Int,
+    kills: Array[Int],
+    deaths: Array[Int],
+    assists: Array[Int],
+    champLevels: Array[Int],
+    currentGold: Array[Int],
+    spentGold: Array[Int],
+    minionKills: Array[Int],
+    leagues: Array[Int],
+    winner: Int
+  )
 }
