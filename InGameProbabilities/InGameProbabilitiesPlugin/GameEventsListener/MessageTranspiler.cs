@@ -57,7 +57,7 @@ namespace InGameProbabilitiesPlugin.GameEventsListener
             kills = new int[10];
             deaths = new int[10];
             assists = new int[10];
-            champLevels = new int[2];
+            champLevels = new int[10];
             goldTotal = new int[10];
             minionKills = new int[10];
 

@@ -70,6 +70,7 @@
     <Compile Include="EntryPoint.cs" />
     <Compile Include="GameEventsListener\GameEventListener.cs" />
     <Compile Include="GameEventsListener\MessageTranspiler.cs" />
+    <Compile Include="InjectionManager\LeagueInjectionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +78,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="InjectionManager\" />
+    <Folder Include="GameEventsListener\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClrInjectionLib\ClrInjectionLib.vcxproj">
+      <Project>{a1596b17-cdee-4e18-abd5-ad6c2dc43afa}</Project>
+      <Name>ClrInjectionLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
