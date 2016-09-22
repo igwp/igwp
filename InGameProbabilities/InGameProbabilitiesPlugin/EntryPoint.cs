@@ -1,15 +1,27 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using InGameProbabilitiesPlugin.GameEventsListener;
+using InGameProbabilitiesPlugin.InjectionManager;
 
 namespace InGameProbabilitiesPlugin
 {
     public class EntryPoint
     {
+        private const string InjectionDll = "LeagueReplayHook.dll";
+
         public static void Main()
         {
             var listener = new GameEventListener(7000);
             var transpiler = new MessageTranspiler();
+
+            var injector = new LeagueInjectionManager();
+            if (!injector.Inject(Path.GetFullPath(InjectionDll)))
+            {
+                Console.Error.WriteLine("league appears to not be running (or injection failed)!");
+                return;
+            }
 
             var done = false;
             try
