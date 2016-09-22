@@ -1,11 +1,11 @@
 package com.team.proba.igwp.etl
 
 import io.circe.Decoder
+import io.circe.generic.auto._
 
 object model {
   case class ParticipantFrame(
     participantId: Int,
-    currentGold: Int,
     totalGold:	Int,
     level: Int,
     minionsKilled: Int
@@ -14,11 +14,10 @@ object model {
     implicit val decode: Decoder[ParticipantFrame] = Decoder.instance { c =>
       for {
         pid <- c.downField("participantId").as[Int]
-        cg <- c.downField("currentGold").as[Int]
         tg <- c.downField("totalGold").as[Int]
         l <- c.downField("level").as[Int]
         mk <- c.downField("minionsKilled").as[Int]
-      } yield ParticipantFrame(pid, cg, tg, l, mk)
+      } yield ParticipantFrame(pid, tg, l, mk)
     }
   }
 
@@ -33,7 +32,7 @@ object model {
     position: Position
   )
   object Event {
-    implicit val decode: Decoder[Event] = Decoder.instance { c =>
+    implicit val decodeEvent: Decoder[Event] = Decoder.instance { c =>
       for {
         et <- c.downField("eventType").as[String]
         kid <- c.downField("killerId").as[Option[Int]]
@@ -49,14 +48,14 @@ object model {
 
   case class Frame(
     events: Seq[Event],
-    participantFrames: Map[String, ParticipantFrame],
+    participantFrames: Map[Int, ParticipantFrame],
     gameTimeMS: Long
   )
   object Frame {
     implicit val decode: Decoder[Frame] = Decoder.instance { c =>
       for {
         es <- c.downField("events").as[Seq[Event]]
-        pfs <- c.downField("participantFrames").as[Map[String, ParticipantFrame]]
+        pfs <- c.downField("participantFrames").as[Map[Int, ParticipantFrame]]
         gt <- c.downField("timestamp").as[Long]
       } yield Frame(es, pfs, gt)
     }
@@ -109,30 +108,33 @@ object model {
       val botRight = Position(15220, -420)
       val zeroExample = Example(
         0L,
-        participants.map(_.championId).toArray,
+        participants.map(_.championId),
         0,
         0,
         0,
         0,
         0,
         0,
-        Array.fill(10)(0),
-        Array.fill(10)(0),
-        Array.fill(10)(0),
-        Array.fill(10)(1),
-        Array.fill(10)(500),
-        Array.fill(10)(0),
-        Array.fill(10)(0),
-        participants.map(_.highestAchievedSeasonTier).toArray,
+        0,
+        0,
+        Seq.fill(10)(0),
+        Seq.fill(10)(0),
+        Seq.fill(10)(0),
+        Seq.fill(10)(1),
+        Seq.fill(10)(0),
+        participants.map(_.highestAchievedSeasonTier),
         winner
       )
       timeline.frames.scanLeft(zeroExample) { (ex, f) =>
         val kills = f.events.filter(evt => evt.eventType == "CHAMPION_KILL" && evt.killerId != 0)
-        kills.foreach { evt =>
-          ex.kills.update(evt.killerId - 1, ex.kills(evt.killerId - 1) + 1)
-          ex.deaths.update(evt.victimId - 1, ex.deaths(evt.victimId - 1) + 1)
-          evt.assistingParticipantIds.foreach(id => ex.assists.update(id - 1, ex.assists(id - 1) + 1))
-        }
+        val exWithKills = ex.copy(
+          kills = kills.map(_.killerId)
+            .foldLeft(ex.kills)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1)),
+          deaths = kills.map(_.victimId)
+            .foldLeft(ex.deaths)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1)),
+          assists = kills.flatMap(_.assistingParticipantIds)
+            .foldLeft(ex.assists)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1))
+        )
 
         val towerKills = f.events.filter(_.eventType == "BUILDING_KILL")
         val towersKillsPerTeam = towerKills.map { evt =>
@@ -146,8 +148,9 @@ object model {
             else (0, 1)
           }
         }.foldLeft((0, 0))((s, e) => (s._1 + e._1, s._2 + e._2))
-        val exWithTowerKills = ex.copy(towerKillsTeam1 = ex.towerKillsTeam1 + towersKillsPerTeam._1,
-          towerKillsTeam2 = ex.towerKillsTeam2 + towersKillsPerTeam._2)
+        val exWithTowerKills = exWithKills.copy(
+          towerKillsTeam1 = exWithKills.towerKillsTeam1 + towersKillsPerTeam._1,
+          towerKillsTeam2 = exWithKills.towerKillsTeam2 + towersKillsPerTeam._2)
 
         val monsterKills = f.events.filter(_.eventType == "ELITE_MONSTER_KILL")
         val dragonKillsPerTeam = monsterKills.filter(_.monsterType == "DRAGON").map { evt =>
@@ -161,9 +164,18 @@ object model {
           if (evt.killerId <= 5) (1, 0)
           else (0, 1)
         }.foldLeft((0, 0))((s, e) => (s._1 + e._1, s._2 + e._2))
-        exWithDragonKills.copy(
+        val exWithBaronKills = exWithDragonKills.copy(
           baronKillsTeam1 = exWithDragonKills.dragonKillsTeam1 + baronKillsPerTeam._1,
           baronKillsTeam2 = exWithDragonKills.dragonKillsTeam2 + baronKillsPerTeam._2)
+
+        val sortedPFs = f.participantFrames.toSeq.sortBy(_._1)
+        exWithBaronKills.copy(
+          gameTimeMS = f.gameTimeMS,
+          goldTeam1 = f.participantFrames.filter(_._1 <= 5).map(_._2.totalGold).sum,
+          goldTeam2 = f.participantFrames.filter(_._1 > 5).map(_._2.totalGold).sum,
+          champLevels = sortedPFs.map(_._2.level).toArray,
+          minionKills = sortedPFs.map(_._2.minionsKilled).toArray
+        )
       }
     }
   }
@@ -179,21 +191,21 @@ object model {
 
   case class Example(
     gameTimeMS: Long,
-    championIds: Array[Int],
+    championIds: Seq[Int],
     baronKillsTeam1: Int,
     baronKillsTeam2: Int,
     dragonKillsTeam1: Int,
     dragonKillsTeam2: Int,
     towerKillsTeam1: Int,
     towerKillsTeam2: Int,
-    kills: Array[Int],
-    deaths: Array[Int],
-    assists: Array[Int],
-    champLevels: Array[Int],
-    currentGold: Array[Int],
-    spentGold: Array[Int],
-    minionKills: Array[Int],
-    leagues: Array[String],
+    goldTeam1: Int,
+    goldTeam2: Int,
+    kills: Seq[Int],
+    deaths: Seq[Int],
+    assists: Seq[Int],
+    champLevels: Seq[Int],
+    minionKills: Seq[Int],
+    leagues: Seq[String],
     winner: Int
   )
 }

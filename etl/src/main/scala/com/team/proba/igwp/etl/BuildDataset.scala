@@ -3,6 +3,7 @@ package com.team.proba.igwp.etl
 import java.io.FileWriter
 
 import cats.data.Xor
+import com.team.proba.igwp.etl.model.MatchDetail
 import com.twitter.util.{Duration, TimerTask, JavaTimer}
 import com.typesafe.config.ConfigFactory
 import io.circe.generic.auto._
@@ -14,7 +15,6 @@ import scala.io.Source
 
 object BuildDataset {
   def main(args: Array[String]): Unit = {
-    import model._
     val apiKey = ConfigFactory.load().getString("api.key")
     val urlTemplate = "https://na.api.pvp.net/api/lol/na/v2.2" +
       s"/match/%s?includeTimeline=true&api_key=$apiKey"
@@ -42,7 +42,7 @@ object BuildDataset {
           } else {
             fileWriter.write(s"${jsons.mkString(",")}\n")
           }
-        case Xor.Left(e) => println("couldn't retrieve match detail data", e)
+        case Xor.Left(e) => println(s"couldn't retrieve match detail data $e")
       }
     }
     require(task != null)
