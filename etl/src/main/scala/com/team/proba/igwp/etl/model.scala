@@ -106,34 +106,55 @@ object model {
     def toExamples: Seq[Example] = {
       val topLeft = Position(-570, 14980)
       val botRight = Position(15220, -420)
+
+      val tiers = List(
+        "CHALLENGER", "MASTER", "DIAMOND", "PLATINUM", "GOLD", "SILVER", "BRONZE", "UNRANKED")
+      val ordering = new Ordering[String] {
+        override def compare(x: String, y: String): Int =
+          if (tiers.contains(x) && tiers.contains(y))
+            if (tiers.indexOf(x) > tiers.indexOf(y)) 1
+            else 0
+          else if (tiers.contains(x)) 1
+          else if (tiers.contains(y)) 0
+          else 1
+      }
+      val leaguesTeam1 = participants
+        .filter(_.participantId <= 5)
+        .map(_.highestAchievedSeasonTier)
+        .sorted(ordering)
+      val leaguesTeam2 = participants
+        .filter(_.participantId > 5)
+        .map(_.highestAchievedSeasonTier)
+        .sorted(ordering)
+
       val zeroExample = Example(
-        0L,
-        participants.map(_.championId),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        Seq.fill(10)(0),
-        Seq.fill(10)(0),
-        Seq.fill(10)(0),
-        Seq.fill(10)(1),
-        Seq.fill(10)(0),
-        participants.map(_.highestAchievedSeasonTier),
+        gameTimeMS = 0L,
+        championIds = participants.map(_.championId),
+        baronKillsTeam1 = 0, baronKillsTeam2 = 0,
+        dragonKillsTeam1 = 0, dragonKillsTeam2 = 0,
+        towerKillsTeam1 = 0, towerKillsTeam2 = 0,
+        goldTeam1 = 2500, goldTeam2 = 2500,
+        killsTeam1 = 0, killsTeam2 = 0,
+        deathsTeam1 = 0, deathsTeam2 = 0,
+        assistsTeam1 = 0, assistsTeam2 = 0,
+        champLvlsTeam1 = 5, champLvlsTeam2 = 5,
+        minionKillsTeam1 = 0, minionKillsTeam2 = 0,
+        minLeagueTeam1 = leaguesTeam1.min(ordering), minLeagueTeam2 = leaguesTeam2.min(ordering),
+        maxLeagueTeam1 = leaguesTeam1.max(ordering), maxLeagueTeam2 = leaguesTeam2.max(ordering),
         winner
       )
+
       timeline.frames.scanLeft(zeroExample) { (ex, f) =>
         val kills = f.events.filter(evt => evt.eventType == "CHAMPION_KILL" && evt.killerId != 0)
         val exWithKills = ex.copy(
-          kills = kills.map(_.killerId)
-            .foldLeft(ex.kills)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1)),
-          deaths = kills.map(_.victimId)
-            .foldLeft(ex.deaths)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1)),
-          assists = kills.flatMap(_.assistingParticipantIds)
-            .foldLeft(ex.assists)((acc, i) => acc.updated(i - 1, acc(i - 1) + 1))
+          killsTeam1 = ex.killsTeam1 + kills.count(_.killerId <= 5),
+          killsTeam2 = ex.killsTeam1 + kills.count(_.killerId > 5),
+          deathsTeam1 = ex.deathsTeam1 + kills.count(_.victimId <= 5),
+          deathsTeam2 = ex.deathsTeam1 + kills.count(_.victimId > 5),
+          assistsTeam1 = ex.assistsTeam1 +
+            kills.flatMap(_.assistingParticipantIds).count(_ <= 5),
+          assistsTeam2 = ex.assistsTeam2 +
+            kills.flatMap(_.assistingParticipantIds).count(_ > 5)
         )
 
         val towerKills = f.events.filter(_.eventType == "BUILDING_KILL")
@@ -169,12 +190,17 @@ object model {
           baronKillsTeam2 = exWithDragonKills.baronKillsTeam2 + baronKillsPerTeam._2)
 
         val sortedPFs = f.participantFrames.toSeq.sortBy(_._1)
+        val participantsTeam1 = sortedPFs.filter(_._2.participantId <= 5)
+        val participantsTeam2 = sortedPFs.filter(_._2.participantId > 5)
+        exWithBaronKills.copy(gameTimeMS = f.gameTimeMS, goldTeam1 = 12)
         exWithBaronKills.copy(
           gameTimeMS = f.gameTimeMS,
-          goldTeam1 = f.participantFrames.filter(_._2.participantId <= 5).map(_._2.totalGold).sum,
-          goldTeam2 = f.participantFrames.filter(_._2.participantId > 5).map(_._2.totalGold).sum,
-          champLevels = sortedPFs.map(_._2.level),
-          minionKills = sortedPFs.map(_._2.minionsKilled)
+          goldTeam1 = participantsTeam1.map(_._2.totalGold).sum,
+          goldTeam2 = participantsTeam2.map(_._2.totalGold).sum,
+          champLvlsTeam1 = participantsTeam1.map(_._2.level).sum,
+          champLvlsTeam2 = participantsTeam2.map(_._2.level).sum,
+          minionKillsTeam1 = participantsTeam1.map(_._2.minionsKilled).sum,
+          minionKillsTeam2 = participantsTeam2.map(_._2.minionsKilled).sum
         )
       }
     }
@@ -200,12 +226,20 @@ object model {
     towerKillsTeam2: Int,
     goldTeam1: Int,
     goldTeam2: Int,
-    kills: Seq[Int],
-    deaths: Seq[Int],
-    assists: Seq[Int],
-    champLevels: Seq[Int],
-    minionKills: Seq[Int],
-    leagues: Seq[String],
+    killsTeam1: Int,
+    killsTeam2: Int,
+    deathsTeam1: Int,
+    deathsTeam2: Int,
+    assistsTeam1: Int,
+    assistsTeam2: Int,
+    champLvlsTeam1: Int,
+    champLvlsTeam2: Int,
+    minionKillsTeam1: Int,
+    minionKillsTeam2: Int,
+    minLeagueTeam1: String,
+    minLeagueTeam2: String,
+    maxLeagueTeam1: String,
+    maxLeagueTeam2: String,
     winner: Int
   ) {
     def toCsvString: String = (
@@ -219,15 +253,22 @@ object model {
           towerKillsTeam1,
           towerKillsTeam2,
           goldTeam1,
-          goldTeam2
-        ) ++
-        kills ++
-        deaths ++
-        assists ++
-        champLevels ++
-        minionKills ++
-        leagues ++
-        Seq(winner)
+          goldTeam2,
+          killsTeam1,
+          killsTeam2,
+          deathsTeam1,
+          deathsTeam2,
+          assistsTeam1,
+          assistsTeam2,
+          champLvlsTeam1,
+          champLvlsTeam2,
+          minionKillsTeam1,
+          minionKillsTeam2,
+          minLeagueTeam1,
+          minLeagueTeam2,
+          maxLeagueTeam1,
+          maxLeagueTeam2,
+          winner)
       ).mkString(",")
   }
 }
