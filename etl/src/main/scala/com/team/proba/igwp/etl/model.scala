@@ -207,5 +207,27 @@ object model {
     minionKills: Seq[Int],
     leagues: Seq[String],
     winner: Int
-  )
+  ) {
+    def toCsvString: String = (
+      Seq(gameTimeMS) ++
+        championIds ++
+        Seq(
+          baronKillsTeam1,
+          baronKillsTeam2,
+          dragonKillsTeam1,
+          dragonKillsTeam2,
+          towerKillsTeam1,
+          towerKillsTeam2,
+          goldTeam1,
+          goldTeam2
+        ) ++
+        kills ++
+        deaths ++
+        assists ++
+        champLevels ++
+        minionKills ++
+        leagues ++
+        Seq(winner)
+      ).mkString(",")
+  }
 }
