@@ -20,7 +20,7 @@ lazy val model = project.in(file("."))
     organization := "com.team.proba",
     version := "0.1",
     scalaVersion := "2.11.8",
-    name := "model-building",
+    name := "model",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-core",
       "org.apache.spark" %% "spark-mllib",

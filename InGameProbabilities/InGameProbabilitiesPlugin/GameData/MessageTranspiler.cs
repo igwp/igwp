@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InGameProbabilitiesPlugin.GameEventsListener
+namespace InGameProbabilitiesPlugin.GameData
 {
     public enum MessageType
     {
@@ -65,7 +65,7 @@ namespace InGameProbabilitiesPlugin.GameEventsListener
             Initialize();
         }
 
-        public void Initialize()
+        private void Initialize()
         {
             messageMap.Add(MessageType.GameTime, "GameTime");
             messageMap.Add(MessageType.BaronKill, "BaronTime");

@@ -21,6 +21,15 @@ object BuildDataset {
     require(urlsQeueue.nonEmpty, "there should be URLs to query")
 
     val fileWriter = new FileWriter("src/main/resources/matches.csv")
+    val headerLine = "gameTimeMS," +
+      "champion1Id,champion2Id,champion3Id,champion4Id,champion5Id," +
+      "champion6Id,champion7Id,champion8Id,champion9Id,champion10Id," +
+      "baronKillsTeam1,baronKillsTeam2,dragonKillsTeam1,dragonKillsTeam2," +
+      "towerKillsTeam1,towerKillsTeam2,goldTeam1,goldTeam2," +
+      "killsTeam1,killsTeam2,deathsTeam1,deathsTeam2,assistsTeam1,assistsTeam2," +
+      "champLvlsTeam1,champLvlsTeam2,minionKillsTeam1,minionKillsTeam2," +
+      "minLeagueTeam1,minLeagueTeam2,maxLeagueTeam1,maxLeagueTeam2,winner\n"
+    fileWriter.write(headerLine)
 
     val timer = new JavaTimer(isDaemon = false)
     lazy val task: TimerTask = timer.schedule(Duration.fromSeconds(1)) {
