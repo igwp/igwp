@@ -2,8 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using InGameProbabilitiesPlugin.GameEventsListener;
+using InGameProbabilitiesPlugin.GameData;
 using InGameProbabilitiesPlugin.InjectionManager;
+using InGameProbabilitiesPlugin.Network;
 
 namespace InGameProbabilitiesPlugin
 {
@@ -15,6 +16,8 @@ namespace InGameProbabilitiesPlugin
         {
             var listener = new GameEventListener(7000);
             var transpiler = new MessageTranspiler();
+            var stateManager = new StateManager();
+            var networkInterface = new NetworkInterface("http://127.0.0.1", 3000);
 
             var injector = new LeagueInjectionManager();
             if (!injector.Inject(Path.GetFullPath(InjectionDll)))
@@ -28,21 +31,38 @@ namespace InGameProbabilitiesPlugin
             var done = false;
             try
             {
+                var count = 0;
                 while (!done)
                 {
+                    count++;
                     var rawMessage = listener.GetMessage();
                     var messages = transpiler.Translate(rawMessage);
                     foreach (var message in messages)
                     {
-                        var teamId = Enum.GetName(typeof(TeamID), message.teamId);
-                        var type = Enum.GetName(typeof(MessageType), message.type);
-                        Console.WriteLine("Team: {0}, Type: {1}, Value: {2}", teamId, type, message.value);
+                        stateManager.UpdateState(message);
+                    }
+
+                    if (count > 50)
+                    {
+                        var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
+                        Console.WriteLine("Probability: " + result.probability);
+                        count = 0;
                     }
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+        }
+
+        public void printMessages(GameMessage[] messages)
+        {
+            foreach (var message in messages)
+            {
+                var teamId = Enum.GetName(typeof(TeamID), message.teamId);
+                var type = Enum.GetName(typeof(MessageType), message.type);
+                Console.WriteLine("Team: {0}, Type: {1}, Value: {2}", teamId, type, message.value);
             }
         }
     }

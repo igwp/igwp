@@ -57,6 +57,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -69,13 +73,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EntryPoint.cs" />
-    <Compile Include="GameEventsListener\GameEventListener.cs" />
-    <Compile Include="GameEventsListener\MessageTranspiler.cs" />
+    <Compile Include="GameData\GameEventListener.cs" />
+    <Compile Include="GameData\MessageTranspiler.cs" />
+    <Compile Include="GameData\StateManager.cs" />
     <Compile Include="InjectionManager\LeagueInjectionManager.cs" />
+    <Compile Include="Network\NetworkInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

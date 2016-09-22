@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 
-namespace InGameProbabilitiesPlugin.GameEventsListener
+namespace InGameProbabilitiesPlugin.GameData
 {
     public class GameEventListener
     {
