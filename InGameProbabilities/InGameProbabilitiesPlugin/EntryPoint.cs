@@ -23,6 +23,8 @@ namespace InGameProbabilitiesPlugin
                 return;
             }
 
+            Console.WriteLine("successfully injected {0} into league!", InjectionDll);
+
             var done = false;
             try
             {
