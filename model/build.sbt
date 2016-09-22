@@ -1,4 +1,5 @@
 lazy val sparkVersion = "2.0.0"
+lazy val configVersion = "1.3.0"
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -25,6 +26,7 @@ lazy val model = project.in(file("."))
       "org.apache.spark" %% "spark-core",
       "org.apache.spark" %% "spark-mllib",
       "org.apache.spark" %% "spark-sql"
-    ).map(_ % sparkVersion % "provided"),
+    ).map(_ % sparkVersion % "provided") :+
+      "com.typesafe" % "config" % configVersion,
     scalacOptions ++= compilerOptions
   )
