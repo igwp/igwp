@@ -21,9 +21,21 @@ bool ClrInjectionLib::Injector::Inject32(int processId, System::String^ dllName)
     auto dllNameNative = (char*)(void*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(dllName);
 
     auto remoteMemory = VirtualAllocEx(process, nullptr, dllName->Length, MEM_COMMIT, PAGE_READWRITE);
-    WriteProcessMemory(process, remoteMemory, (void*)dllNameNative, dllName->Length, nullptr);
+    if(!WriteProcessMemory(process, remoteMemory, (void*)dllNameNative, dllName->Length, nullptr))
+    {
+        auto err = GetLastError();
+        DebugBreak();
+        return false;
+    }
 
     auto thread = CreateRemoteThread(process, nullptr, 0, (LPTHREAD_START_ROUTINE) GetProcAddress(kernelHandle, "LoadLibraryA"), remoteMemory, 0, nullptr);
+    if(thread == nullptr)
+    {
+        auto err = GetLastError();
+        DebugBreak();
+        return false;
+    }
+    
     WaitForSingleObject(thread, INFINITE);
 
     DWORD exitCode;
