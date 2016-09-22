@@ -48,16 +48,16 @@ object model {
 
   case class Frame(
     events: Seq[Event],
-    participantFrames: Map[Int, ParticipantFrame],
+    participantFrames: Map[String, ParticipantFrame],
     gameTimeMS: Long
   )
   object Frame {
     implicit val decode: Decoder[Frame] = Decoder.instance { c =>
       for {
-        es <- c.downField("events").as[Seq[Event]]
-        pfs <- c.downField("participantFrames").as[Map[Int, ParticipantFrame]]
+        es <- c.downField("events").as[Option[Seq[Event]]]
+        pfs <- c.downField("participantFrames").as[Map[String, ParticipantFrame]]
         gt <- c.downField("timestamp").as[Long]
-      } yield Frame(es, pfs, gt)
+      } yield Frame(es.getOrElse(Seq.empty), pfs, gt)
     }
   }
 
@@ -171,8 +171,8 @@ object model {
         val sortedPFs = f.participantFrames.toSeq.sortBy(_._1)
         exWithBaronKills.copy(
           gameTimeMS = f.gameTimeMS,
-          goldTeam1 = f.participantFrames.filter(_._1 <= 5).map(_._2.totalGold).sum,
-          goldTeam2 = f.participantFrames.filter(_._1 > 5).map(_._2.totalGold).sum,
+          goldTeam1 = f.participantFrames.filter(_._2.participantId <= 5).map(_._2.totalGold).sum,
+          goldTeam2 = f.participantFrames.filter(_._2.participantId > 5).map(_._2.totalGold).sum,
           champLevels = sortedPFs.map(_._2.level),
           minionKills = sortedPFs.map(_._2.minionsKilled)
         )
@@ -207,5 +207,27 @@ object model {
     minionKills: Seq[Int],
     leagues: Seq[String],
     winner: Int
-  )
+  ) {
+    def toCsvString: String = (
+      Seq(gameTimeMS) ++
+        championIds ++
+        Seq(
+          baronKillsTeam1,
+          baronKillsTeam2,
+          dragonKillsTeam1,
+          dragonKillsTeam2,
+          towerKillsTeam1,
+          towerKillsTeam2,
+          goldTeam1,
+          goldTeam2
+        ) ++
+        kills ++
+        deaths ++
+        assists ++
+        champLevels ++
+        minionKills ++
+        leagues ++
+        Seq(winner)
+      ).mkString(",")
+  }
 }
