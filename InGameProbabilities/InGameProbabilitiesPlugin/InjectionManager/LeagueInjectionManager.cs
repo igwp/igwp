@@ -1,5 +1,4 @@
-﻿
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -32,11 +31,9 @@ namespace InGameProbabilitiesPlugin.InjectionManager
             {
                 return false;
             }
-
+            
             return ClrInjectionLib.Injector.Inject32(league.Id, dllName);
         }
-
-        
     }
 
     static class ProcessExt
