@@ -21,7 +21,7 @@ namespace InGameProbabilitiesPlugin
 
         private double winChance;
 
-        private NetworkInterface networkInterface;
+        private readonly NetworkInterface networkInterface;
 
         private StateManager stateManager;
 
@@ -81,19 +81,23 @@ namespace InGameProbabilitiesPlugin
 
         }
 
-        public void InitializeState(string summonerName)
+        public void InitializeState(string[] blueTeam, string[] redTeam, Action<object> callback)
         {
-            var summonerId = networkInterface.GetSummonerId(summonerName);
-            var currentGame = networkInterface.GetCurrentGame(summonerId);
-            var leagues = networkInterface.GetRank(currentGame.summonerIds);
+            Task.Run(() =>
+            {
+                var summonerId = networkInterface.GetSummonerId(blueTeam[0]);
+                var currentGame = networkInterface.GetCurrentGame(summonerId);
+                var leagues = networkInterface.GetRank(currentGame.summonerIds);
 
-            stateManager = new StateManager(currentGame.championIds, leagues);
+                stateManager = new StateManager(currentGame.championIds, leagues);
+
+                callback?.Invoke(true);
+            });
         }
 
-        public double GetProbability()
-        {
-            return winChance;
-        }
+        public double BlueWinChance => winChance;
+
+        public double RedWinChange => 1 - winChance;
 
         public void printMessages(GameMessage[] messages)
         {

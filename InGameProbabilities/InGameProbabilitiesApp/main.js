@@ -14,16 +14,6 @@ plugin.initialize(function(status) {
     document.querySelector('#messages').appendChild(obj);
   }
 
-  plugin.get().StartApp(function(success) {
-    var obj = document.createElement("div");
-    if(success === true) {
-      obj.innerText = 'init successful'
-    } else  {
-      obj.innerText = 'init failed'
-    }
-    document.querySelector('#messages').appendChild(obj)
-  });
-
     overwolf.windows.getCurrentWindow(function(result) {
         overwolf.windows.changePosition(result.window.id, 0, 16, function()   {
             overwolf.windows.changeSize(result.window.id, 1920, 400, null);
@@ -49,3 +39,91 @@ plugin.initialize(function(status) {
   plugin.get().triggerGlobalEvent();
     */
 });
+
+function registerEvents()   {
+    overwolf.games.events.onError.addListener(function(info)    {
+        console.log("Error: " + JSON.stringify(info));
+    });
+
+    overwolf.games.events.onInfoUpdates2.addListener(function(info)    {
+        console.log("info: " + JSON.stringify(info));
+    });
+
+    overwolf.games.events.onNewEvents.addListener(function(info)    {
+        console.log("event: " + JSON.stringify(info));
+    });
+}
+
+function setFeatures(callback)  {
+    overwolf.games.events.setRequiredFeatures(['teams'], function(info) {
+        if(info.status == 'error')  {
+            console.log('could not set required features: ' + info.reason);
+            if(callback !== undefined)    {
+                callback(false);
+            }
+        }   else    {
+            console.log('set required features!');
+            console.log(JSON.stringify(info));
+            if(callback !== undefined)    {
+                callback(true);
+            }
+        }
+    })
+}
+
+overwolf.games.events.getInfo(function(info)    {
+    var teams = JSON.parse(decodeURIComponent(info.res.game_info.teams));
+
+    var blue = teams.filter(function(player) {
+        return player.team == 100;
+    });
+
+    var red = teams.filter(function(player)   {
+        return player.team == 200;
+    });
+
+    var extractSummoner = function(player)  {
+        return player.summoner;
+    };
+
+    var blueNames = blue.map(extractSummoner);
+    var redNames = red.map(extractSummoner);
+
+    plugin.get().InitializeState(blueNames, redNames, function(success)   {
+        if(success) {
+            plugin.get().StartApp(function(success) {
+                var obj = document.createElement("div");
+                if(success === true) {
+                    obj.innerText = 'init successful'
+                } else  {
+                    obj.innerText = 'init failed'
+                }
+                document.querySelector('#messages').appendChild(obj)
+            });
+        }
+    });
+
+    /*
+
+    var blue = teams.filter(function(player) {
+        return player.team == 100;
+    });
+
+    var red = teams.filter(function(player)   {
+        return player.team == 200;
+    });
+
+    var extractSummoner = function(player)  {
+        return player.summoner;
+    };
+
+    var blueNames = blue.map(extractSummoner);
+    var redNames = red.map(extractSummoner);
+
+    console.log('blue players: ' + JSON.stringify(blueNames));
+    console.log('red players: ' + JSON.stringify(redNames));
+    */
+});
+
+//registerEvents();
+//setFeatures();

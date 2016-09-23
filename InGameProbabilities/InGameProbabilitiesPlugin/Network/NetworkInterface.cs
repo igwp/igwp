@@ -8,6 +8,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using RiotSharp;
+using RiotSharp.LeagueEndpoint;
 
 namespace InGameProbabilitiesPlugin.Network
 {
@@ -83,7 +84,6 @@ namespace InGameProbabilitiesPlugin.Network
         public RiotSharp.LeagueEndpoint.Tier[] GetRank(long[] summonerIds)
         {
             var summonerList = new List<int>();
-            var result = new RiotSharp.LeagueEndpoint.Tier[10];
 
             foreach (var i in summonerIds)
             {
@@ -93,23 +93,18 @@ namespace InGameProbabilitiesPlugin.Network
             try
             {
                 var participants = apiClient.GetLeagues(Region.na, summonerList);
-                foreach (var i in summonerIds)
+                return summonerIds.Select((long summId) =>
                 {
-                    var leagues = participants[i];
-                    foreach (var league in leagues)
-                    {
-                        if (league.Queue == RiotSharp.Queue.RankedSolo5x5)
-                        {
-                            result[i] = league.Tier;
-                        }
-                    }
-                }
+                    var leagues = participants[summId];
+                    var tier = leagues.FirstOrDefault(l => l.Queue == Queue.RankedSolo5x5);
+                    return tier?.Tier ?? Tier.Unranked;
+                }).ToArray();
             }
             catch (RiotSharpException ex)
             {
                 Console.Write(ex);
             }
-            return result;
+            return null;
         }
     }
 }

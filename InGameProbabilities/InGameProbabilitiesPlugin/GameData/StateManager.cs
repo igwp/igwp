@@ -59,12 +59,15 @@ namespace InGameProbabilitiesPlugin.GameData
         {
             return Enum.GetName(typeof(RiotSharp.LeagueEndpoint.Tier), tier).ToUpper();
         }
-
+        
         public Tier[] FindMinMaxLeague(Tier[] leagues)
         {
+            // bad. dont do this.
             Tier[] minMax = new Tier[2];
 
-            if (leagues.Contains(Tier.Bronze))
+            if (leagues.Contains(Tier.Unranked))
+                minMax[0] = Tier.Unranked;
+            else if (leagues.Contains(Tier.Bronze))
                 minMax[0] = Tier.Bronze;
             else if (leagues.Contains(Tier.Silver))
                 minMax[0] = Tier.Silver;
@@ -91,8 +94,10 @@ namespace InGameProbabilitiesPlugin.GameData
                 minMax[1] = Tier.Gold;
             else if (leagues.Contains(Tier.Silver))
                 minMax[1] = Tier.Silver;
-            else
+            else if(leagues.Contains(Tier.Bronze))
                 minMax[1] = Tier.Bronze;
+            else
+                minMax[1] = Tier.Unranked;
 
             return minMax;
         }
