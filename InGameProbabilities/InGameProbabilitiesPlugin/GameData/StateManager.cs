@@ -22,24 +22,24 @@ namespace InGameProbabilitiesPlugin.GameData
 
         private void Initialize()
         {
-            teamState["BaronKillBlue"] = "0";
-            teamState["BaronKillRed"] = "0";
-            teamState["DragonKillBlue"] = "0";
-            teamState["DragonKillRed"] = "0";
-            teamState["TowerKillBlue"] = "0";
-            teamState["TowerKillRed"] = "0";
-            teamState["KillBlue"] = "0";
-            teamState["KillRed"] = "0";
-            teamState["DeathBlue"] = "0";
-            teamState["DeathsRed"] = "0";
-            teamState["AssistBlue"] = "0";
-            teamState["AssistRed"] = "0";
-            teamState["LevelBlue"] = "0";
-            teamState["LevelRed"] = "0";
-            teamState["TotalGoldBlue"] = "0";
-            teamState["TotalGoldRed"] = "0";
-            teamState["MinionKillBlue"] = "0";
-            teamState["MinionKillRed"] = "0";
+            teamState["baronKillBlue"] = "0";
+            teamState["baronKillRed"] = "0";
+            teamState["dragonKillBlue"] = "0";
+            teamState["dragonKillRed"] = "0";
+            teamState["towerKillBlue"] = "0";
+            teamState["towerKillRed"] = "0";
+            teamState["killBlue"] = "0";
+            teamState["killRed"] = "0";
+            teamState["deathBlue"] = "0";
+            teamState["deathsRed"] = "0";
+            teamState["assistBlue"] = "0";
+            teamState["assistRed"] = "0";
+            teamState["levelBlue"] = "0";
+            teamState["levelRed"] = "0";
+            teamState["totalGoldBlue"] = "0";
+            teamState["totalGoldRed"] = "0";
+            teamState["minionKillBlue"] = "0";
+            teamState["minionKillRed"] = "0";
         }
 
         public void UpdateState(GameMessage message)
@@ -54,7 +54,9 @@ namespace InGameProbabilitiesPlugin.GameData
             }
             else
             {
-                var key = Enum.GetName(typeof(MessageType), message.type) + message.teamId;
+                var name = Enum.GetName(typeof(MessageType), message.type);
+                name = char.ToLower(name[0]) + name.Substring(1);
+                var key = name + message.teamId;
                 teamState[key] = "" + message.value;
             }
         }
@@ -62,8 +64,8 @@ namespace InGameProbabilitiesPlugin.GameData
         public IDictionary<string, string> GetCurrentState()
         {
             var result = new Dictionary<string, string>(teamState);
-            result["GameTime"] = "" + gameTime;
-            result["ChampionIds"] = "[" + string.Join(",", championIds) + "]";
+            result["gameTime"] = "" + gameTime;
+            result["championIds"] = "[" + string.Join(",", championIds) + "]";
             return result;
         }
     }

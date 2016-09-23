@@ -17,7 +17,7 @@ namespace InGameProbabilitiesPlugin
             var listener = new GameEventListener(7000);
             var transpiler = new MessageTranspiler();
             var stateManager = new StateManager();
-            var networkInterface = new NetworkInterface("http://127.0.0.1", 3000);
+            var networkInterface = new NetworkInterface("http://54.183.147.234", 3000);
 
             var injector = new LeagueInjectionManager();
             if (!injector.Inject(Path.GetFullPath(InjectionDll)))
