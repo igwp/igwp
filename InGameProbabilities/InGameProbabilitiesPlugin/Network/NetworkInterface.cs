@@ -28,12 +28,14 @@ namespace InGameProbabilitiesPlugin.Network
         private HttpClient client;
         private string url;
         private RiotApi apiClient;
+        private string apiKey;
 
-        public NetworkInterface(string addr, int port, string apiKey)
+        public NetworkInterface(string addr, int port, string key)
         {
             client = new HttpClient();
             url = addr + ":" + port;
             apiClient = RiotApi.GetInstance(apiKey);
+            apiKey = key;
         }
 
         public NetworkResponse Post(string path, IDictionary<string, string> content)
@@ -80,6 +82,21 @@ namespace InGameProbabilitiesPlugin.Network
                 Console.Write(ex);
             }
             return result;
+        }
+
+        public long[] GetChampionIds(string[] championNames)
+        {
+            var staticApi = RiotSharp.StaticRiotApi.GetInstance(apiKey);
+            var championKeys = staticApi.GetChampions(Region.na).Keys;
+            var result = new List<long>();
+            foreach (var key in championKeys.Keys)
+            {
+                if (championNames.Contains(championKeys[key]))
+                {
+                    result.Add((long)key);
+                }
+            }
+            return result.ToArray();
         }
 
         public RiotSharp.LeagueEndpoint.Tier[] GetRank(long[] summonerIds)

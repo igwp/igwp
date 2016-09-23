@@ -81,7 +81,7 @@ namespace InGameProbabilitiesPlugin
 
         }
 
-        public void InitializeState(string[] blueTeam, string[] redTeam, Action<object> callback)
+        public void InitializeState(string[] championNames, string[] blueTeam, string[] redTeam, Action<object> callback)
         {
             Task.Run(() =>
             {
@@ -89,8 +89,9 @@ namespace InGameProbabilitiesPlugin
                 var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
                 var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
                 var leaguesRed = networkInterface.GetRank(summonerIdsRed);
+                var championIds = networkInterface.GetChampionIds(championNames);
 
-                stateManager = new StateManager(new long[10], leaguesBlue, leaguesRed);
+                stateManager = new StateManager(championIds, leaguesBlue, leaguesRed);
 
                 callback?.Invoke(true);
             });
