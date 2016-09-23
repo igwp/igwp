@@ -55,10 +55,6 @@ function registerEvents()   {
             console.log("something was missing, couldnt get teams");
         }
     });
-
-    overwolf.games.events.onNewEvents.addListener(function(info)    {
-        console.log("event: " + JSON.stringify(info));
-    });
 }
 
 function setFeatures(callback)  {
@@ -107,8 +103,9 @@ function initializePredictions(teams)  {
                     console.log('successfully started app');
                     plugin.get().WinChanceChanged.addListener(function(blueChance, redChange)   {
                         console.log('win chance changed!');
-                        document.querySelector('#blue_chance').innerText = blueChance + '%';
-                        document.querySelector('#red_chance').innerText = redChange + '%';
+                        document.querySelector('#blue_chance').innerText = Math.round(blueChance * 1000) / 10 + '%';
+                        document.querySelector('#red_chance').innerText = Math.round(redChange * 1000) / 10 + '%';
+                        document.querySelector('#root').style.visibility = 'visible';
                     });
                 } else {
                     console.log('failed to start app!');
