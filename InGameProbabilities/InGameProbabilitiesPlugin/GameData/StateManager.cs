@@ -22,24 +22,24 @@ namespace InGameProbabilitiesPlugin.GameData
 
         private void Initialize()
         {
-            teamState["baronKillBlue"] = "0";
-            teamState["baronKillRed"] = "0";
-            teamState["dragonKillBlue"] = "0";
-            teamState["dragonKillRed"] = "0";
-            teamState["towerKillBlue"] = "0";
-            teamState["towerKillRed"] = "0";
-            teamState["killBlue"] = "0";
-            teamState["killRed"] = "0";
-            teamState["deathBlue"] = "0";
-            teamState["deathsRed"] = "0";
-            teamState["assistBlue"] = "0";
-            teamState["assistRed"] = "0";
-            teamState["levelBlue"] = "0";
-            teamState["levelRed"] = "0";
-            teamState["totalGoldBlue"] = "0";
-            teamState["totalGoldRed"] = "0";
-            teamState["minionKillBlue"] = "0";
-            teamState["minionKillRed"] = "0";
+            teamState["baronKillTeam1"] = "0";
+            teamState["baronKillTeam2"] = "0";
+            teamState["dragonKillTeam1"] = "0";
+            teamState["dragonKillTeam2"] = "0";
+            teamState["towerKillTeam1"] = "0";
+            teamState["towerKillTeam2"] = "0";
+            teamState["killTeam1"] = "0";
+            teamState["killTeam2"] = "0";
+            teamState["deathTeam1"] = "0";
+            teamState["deathsTeam2"] = "0";
+            teamState["assistTeam1"] = "0";
+            teamState["assistTeam2"] = "0";
+            teamState["levelTeam1"] = "0";
+            teamState["levelTeam2"] = "0";
+            teamState["totalGoldTeam1"] = "0";
+            teamState["totalGoldTeam2"] = "0";
+            teamState["minionKillTeam1"] = "0";
+            teamState["minionKillTeam2"] = "0";
         }
 
         public void UpdateState(GameMessage message)
@@ -54,7 +54,7 @@ namespace InGameProbabilitiesPlugin.GameData
             }
             else
             {
-                var name = Enum.GetName(typeof(MessageType), message.type);
+                var name = "Team" + message.type;
                 name = char.ToLower(name[0]) + name.Substring(1);
                 var key = name + message.teamId;
                 teamState[key] = "" + message.value;
