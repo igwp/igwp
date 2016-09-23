@@ -85,6 +85,8 @@ object MatchModel {
       ._1
     println(bestEstimatorParamMap)
 
+    cvModel.save("src/main/resources/model")
+
     spark.stop()
   }
 }
