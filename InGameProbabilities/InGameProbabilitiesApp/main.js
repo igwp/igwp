@@ -47,6 +47,13 @@ function registerEvents()   {
 
     overwolf.games.events.onInfoUpdates2.addListener(function(info)    {
         console.log("info: " + JSON.stringify(info));
+        if(info && info.info.game_info && info.info.game_info.teams)  {
+            var teams = JSON.parse(decodeURIComponent(info.info.game_info.teams));
+
+            initializePredictions(teams);
+        }   else    {
+            console.log("something was missing, couldnt get teams");
+        }
     });
 
     overwolf.games.events.onNewEvents.addListener(function(info)    {
@@ -58,62 +65,27 @@ function setFeatures(callback)  {
     overwolf.games.events.setRequiredFeatures(['teams'], function(info) {
         if(info.status == 'error')  {
             console.log('could not set required features: ' + info.reason);
-            if(callback !== undefined)    {
-                callback(false);
-            }
+            window.setTimeout(function() {setFeatures(callback)}, 1000);
         }   else    {
             console.log('set required features!');
             console.log(JSON.stringify(info));
-            if(callback !== undefined)    {
+            if(callback)    {
                 callback(true);
             }
         }
     })
 }
 
-overwolf.games.events.getInfo(function(info)    {
-    var teams = JSON.parse(decodeURIComponent(info.res.game_info.teams));
-
-    var blue = teams.filter(function(player) {
+function initializePredictions(teams)  {
+    var blue = teams.filter(function (player) {
         return player.team == 100;
     });
 
-    var red = teams.filter(function(player)   {
+    var red = teams.filter(function (player) {
         return player.team == 200;
     });
 
-    var extractSummoner = function(player)  {
-        return player.summoner;
-    };
-
-    var blueNames = blue.map(extractSummoner);
-    var redNames = red.map(extractSummoner);
-
-    plugin.get().InitializeState(blueNames, redNames, function(success)   {
-        if(success) {
-            plugin.get().StartApp(function(success) {
-                var obj = document.createElement("div");
-                if(success === true) {
-                    obj.innerText = 'init successful'
-                } else  {
-                    obj.innerText = 'init failed'
-                }
-                document.querySelector('#messages').appendChild(obj)
-            });
-        }
-    });
-
-    /*
-
-    var blue = teams.filter(function(player) {
-        return player.team == 100;
-    });
-
-    var red = teams.filter(function(player)   {
-        return player.team == 200;
-    });
-
-    var extractSummoner = function(player)  {
+    var extractSummoner = function (player) {
         return player.summoner;
     };
 
@@ -122,8 +94,33 @@ overwolf.games.events.getInfo(function(info)    {
 
     console.log('blue players: ' + JSON.stringify(blueNames));
     console.log('red players: ' + JSON.stringify(redNames));
-    */
-});
 
-//registerEvents();
-//setFeatures();
+    plugin.get().InitializeState(blueNames, redNames, function (success) {
+        if (success) {
+            console.log('successfully initialized state');
+            plugin.get().StartApp(function (success) {
+                if (success === true) {
+                    console.log('successfully started app');
+                    plugin.get().WinChanceChanged.addListener(function(blueChance, redChange)   {
+                        console.log('win chance changed!');
+                        document.querySelector('#blue_chance').innerText = blueChance + '%';
+                        document.querySelector('#red_chance').innerText = redChange + '%';
+                    });
+                } else {
+                    console.log('failed to start app!');
+                }
+            });
+        }
+    });
+}
+
+overwolf.games.events.getInfo(function(info)    {
+    if(info && info.res && info.res.game_info && info.res.game_info.teams) {
+        var teams = JSON.parse(decodeURIComponent(info.res.game_info.teams));
+
+        initializePredictions(teams);
+    }   else    {
+        registerEvents();
+        setFeatures();
+    }
+});

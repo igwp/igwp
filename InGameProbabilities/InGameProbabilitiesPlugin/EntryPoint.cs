@@ -96,9 +96,31 @@ namespace InGameProbabilitiesPlugin
             });
         }
 
-        public double BlueWinChance => winChance;
+        private double WinChance
+        {
+            get
+            {
+                return winChance;
+            }
+            set
+            {
+                if (Math.Abs(value - winChance) > double.Epsilon)
+                {
+                    winChance = value;
+                    WinChanceChanged?.Invoke(this.BlueWinChance, this.RedWinChange);
+                }
+            }
+        }
 
-        public double RedWinChange => 1 - winChance;
+        public double BlueWinChance => this.WinChance;
+
+        public double RedWinChange => 1 - this.WinChance;
+
+        /// <summary>
+        /// Arg1 is blue teams chance
+        /// Arg2 is red teams chance
+        /// </summary>
+        public event Action<object, object> WinChanceChanged;
 
         public void printMessages(GameMessage[] messages)
         {
