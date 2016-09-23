@@ -88,6 +88,10 @@ function initializePredictions(teams)  {
     var extractSummoner = function (player) {
         return player.summoner;
     };
+	
+	var championNames = teams.map(function (player) {
+		return player.champion;
+	});
 
     var blueNames = blue.map(extractSummoner);
     var redNames = red.map(extractSummoner);
@@ -95,7 +99,7 @@ function initializePredictions(teams)  {
     console.log('blue players: ' + JSON.stringify(blueNames));
     console.log('red players: ' + JSON.stringify(redNames));
 
-    plugin.get().InitializeState(blueNames, redNames, function (success) {
+    plugin.get().InitializeState(championNames, blueNames, redNames, function (success) {
         if (success) {
             console.log('successfully initialized state');
             plugin.get().StartApp(function (success) {

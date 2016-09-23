@@ -22,9 +22,9 @@ namespace InGameProbabilitiesPlugin.GameData
 
     public enum TeamID
     {
-        Blue = 0,
-        Red = 1,
-        None = -1
+        None,
+        Blue,
+        Red
     }
 
     public class GameMessage
@@ -141,6 +141,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         }
 
                         dragonKills[teamId] = val;
+                        teamId++;
                         var message = new GameMessage
                         {
                             teamId = (TeamID)teamId,
@@ -154,6 +155,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         var teamId = Int32.Parse("" + token.Last());
                         var val = Int32.Parse(tokens[++i]);
                         towerKills[teamId] = val;
+                        teamId++;
                         var message = new GameMessage
                         {
                             teamId = (TeamID) teamId,

@@ -49,10 +49,9 @@ namespace InGameProbabilitiesPlugin
                     {
                         try
                         {
-                            var count = 0;
+                            var time = DateTime.Now;
                             while (!this.tokenSource.IsCancellationRequested)
                             {
-                                count++;
                                 var rawMessage = listener.GetMessage();
                                 var messages = transpiler.Translate(rawMessage);
                                 foreach (var message in messages)
@@ -60,10 +59,11 @@ namespace InGameProbabilitiesPlugin
                                     stateManager.UpdateState(message);
                                 }
 
-                                if (count > 50)
+                                if (time.AddSeconds(10) < DateTime.Now)
                                 {
                                     var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
-                                    count = 0;
+                                    WinChance = result.team1;
+                                    time = DateTime.Now;
                                 }
                             }
                         }
@@ -84,13 +84,13 @@ namespace InGameProbabilitiesPlugin
         {
             Task.Run(() =>
             {
-                var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
-                var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
-                var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
-                var leaguesRed = networkInterface.GetRank(summonerIdsRed);
+                //var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
+                //var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
+                //var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
+                //var leaguesRed = networkInterface.GetRank(summonerIdsRed);
                 var championIds = networkInterface.GetChampionIds(championNames);
 
-                stateManager = new StateManager(championIds, leaguesBlue, leaguesRed);
+                stateManager = new StateManager(championIds, null, null);
 
                 callback?.Invoke(true);
             });

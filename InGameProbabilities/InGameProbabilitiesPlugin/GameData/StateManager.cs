@@ -16,48 +16,48 @@ namespace InGameProbabilitiesPlugin.GameData
         private string minLeague1;
         private string minLeague2;
 
-        private IDictionary<string, string> teamState;
+        private IDictionary<string, object> teamState;
 
         public StateManager(long[] champIds, Tier[] leaguesBlue, Tier[] leaguesRed)
         {
             gameTime = 0;
             championIds = champIds;
-            teamState = new Dictionary<string, string>();
+            teamState = new Dictionary<string, object>();
             Initialize();
 
-            var minMax1 = FindMinMaxLeague(leaguesBlue);
-            minLeague1 = TierToString(minMax1[0]);
-            maxLeague1 = TierToString(minMax1[1]);
-            var minMax2 = FindMinMaxLeague(leaguesRed);
-            minLeague2 = TierToString(minMax2[0]);
-            maxLeague2 = TierToString(minMax2[1]);
+            //var minMax1 = FindMinMaxLeague(leaguesBlue);
+            //minLeague1 = TierToString(minMax1[0]);
+            //maxLeague1 = TierToString(minMax1[1]);
+            //var minMax2 = FindMinMaxLeague(leaguesRed);
+            //minLeague2 = TierToString(minMax2[0]);
+            //maxLeague2 = TierToString(minMax2[1]);
         }
 
         private void Initialize()
         {
-            teamState["baronKillsTeam1"] = "0";
-            teamState["baronKillsTeam2"] = "0";
-            teamState["dragonKillsTeam1"] = "0";
-            teamState["dragonKillsTeam2"] = "0";
-            teamState["towerKillsTeam1"] = "0";
-            teamState["towerKillsTeam2"] = "0";
-            teamState["killsTeam1"] = "0";
-            teamState["killsTeam2"] = "0";
-            teamState["deathsTeam1"] = "0";
-            teamState["deathsTeam2"] = "0";
-            teamState["assistsTeam1"] = "0";
-            teamState["assistsTeam2"] = "0";
-            teamState["champLvlsTeam1"] = "0";
-            teamState["champLvlsTeam2"] = "0";
-            teamState["goldTeam1"] = "0";
-            teamState["goldTeam2"] = "0";
-            teamState["minionKillsTeam1"] = "0";
-            teamState["minionKillsTeam2"] = "0";
+            teamState["baronKillsTeam1"] = 0;
+            teamState["baronKillsTeam2"] = 0;
+            teamState["dragonKillsTeam1"] = 0;
+            teamState["dragonKillsTeam2"] = 0;
+            teamState["towerKillsTeam1"] = 0;
+            teamState["towerKillsTeam2"] = 0;
+            teamState["killsTeam1"] = 0;
+            teamState["killsTeam2"] = 0;
+            teamState["deathsTeam1"] = 0;
+            teamState["deathsTeam2"] = 0;
+            teamState["assistsTeam1"] = 0;
+            teamState["assistsTeam2"] = 0;
+            teamState["champLvlsTeam1"] = 0;
+            teamState["champLvlsTeam2"] = 0;
+            teamState["goldTeam1"] = 0;
+            teamState["goldTeam2"] = 0;
+            teamState["minionKillsTeam1"] = 0;
+            teamState["minionKillsTeam2"] = 0;
         }
 
         public string TierToString(Tier tier)
         {
-            return Enum.GetName(typeof(RiotSharp.LeagueEndpoint.Tier), tier).ToUpper();
+            return tier.ToString().ToUpper();
         }
         
         public Tier[] FindMinMaxLeague(Tier[] leagues)
@@ -114,22 +114,23 @@ namespace InGameProbabilitiesPlugin.GameData
             }
             else
             {
-                var name = "Team" + message.type;
+                var name = message.type + "Team";
                 name = char.ToLower(name[0]) + name.Substring(1);
-                var key = name + message.teamId;
-                teamState[key] = "" + message.value;
+                var key = name + ((int)message.teamId);
+                teamState[key] = message.value;
             }
         }
 
-        public IDictionary<string, string> GetCurrentState()
+        public IDictionary<string, object> GetCurrentState()
         {
-            var result = new Dictionary<string, string>(teamState);
+            var result = new Dictionary<string, object>(teamState);
             result["gameTimeMS"] = "" + gameTime;
-            result["championIds"] = "[" + string.Join(",", championIds) + "]";
-            result["minLeagueTeam1"] = minLeague1;
-            result["maxLeagueTeam1"] = maxLeague1;
-            result["minLeagueTeam2"] = minLeague2;
-            result["maxLeagueTeam2"] = maxLeague2;
+            result["championIds"] = championIds;
+            // Models have only seen diamond labels
+            result["minLeagueTeam1"] = "DIAMOND";
+            result["maxLeagueTeam1"] = "DIAMOND";
+            result["minLeagueTeam2"] = "DIAMOND";
+            result["maxLeagueTeam2"] = "DIAMOND";
             return result;
         }
     }
