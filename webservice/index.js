@@ -18,8 +18,9 @@ app.post('/getmodel', function (req, res) {
     .then(function () {
       return consumer.subscribe('prediction', [0], function (messageSet, topic, partition) {
         messageSet.forEach(function (m) {
-          console.log('Received from kafka: ' + m);
-          res.json(m.message.value.toString('utf-8'));
+          var data = m.message.value;
+          console.log('Received from kafka: ' + JSON.stringify(JSON.parse(data)));
+          res.json(JSON.parse(data));
         });
       });
     });
@@ -32,7 +33,7 @@ app.post('/getmodel', function (req, res) {
         topic: 'game-state',
         partition: 0,
         message: {
-          value: JSON.stringify(payload)
+          value: payload
         }
       })
     });
