@@ -63,7 +63,6 @@ namespace InGameProbabilitiesPlugin
                                 if (count > 50)
                                 {
                                     var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
-                                    Console.WriteLine("Probability: " + result.probability);
                                     count = 0;
                                 }
                             }

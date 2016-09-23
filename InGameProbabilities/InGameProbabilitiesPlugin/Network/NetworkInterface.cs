@@ -14,7 +14,8 @@ namespace InGameProbabilitiesPlugin.Network
 {
     public class NetworkResponse
     {
-        public double probability;
+        public double team1;
+        public double team2;
     }
 
     public class CurrentGameResponse

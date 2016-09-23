@@ -32,7 +32,7 @@ app.post('/getmodel', function (req, res) {
         topic: 'game-state',
         partition: 0,
         message: {
-          value: JSON.stringify(payload)
+          value: payload
         }
       })
     });

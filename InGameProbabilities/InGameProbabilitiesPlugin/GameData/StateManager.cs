@@ -47,8 +47,8 @@ namespace InGameProbabilitiesPlugin.GameData
             teamState["deathsTeam2"] = "0";
             teamState["assistsTeam1"] = "0";
             teamState["assistsTeam2"] = "0";
-            teamState["champLevelsTeam1"] = "0";
-            teamState["champLevelsTeam2"] = "0";
+            teamState["champLvlsTeam1"] = "0";
+            teamState["champLvlsTeam2"] = "0";
             teamState["goldTeam1"] = "0";
             teamState["goldTeam2"] = "0";
             teamState["minionKillsTeam1"] = "0";
