@@ -36,7 +36,6 @@ namespace InGameProbabilitiesPlugin
             {
                 var listener = new GameEventListener(7000);
                 var transpiler = new MessageTranspiler();
-
                 var injector = new LeagueInjectionManager();
                 
                 var path = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{InjectionDll}";
