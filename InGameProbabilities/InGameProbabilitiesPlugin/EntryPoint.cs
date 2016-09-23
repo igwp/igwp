@@ -85,11 +85,12 @@ namespace InGameProbabilitiesPlugin
         {
             Task.Run(() =>
             {
-                var summonerId = networkInterface.GetSummonerId(blueTeam[0]);
-                var currentGame = networkInterface.GetCurrentGame(summonerId);
-                var leagues = networkInterface.GetRank(currentGame.summonerIds);
+                var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
+                var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
+                var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
+                var leaguesRed = networkInterface.GetRank(summonerIdsRed);
 
-                stateManager = new StateManager(currentGame.championIds, leagues);
+                stateManager = new StateManager(new long[10], leaguesBlue, leaguesRed);
 
                 callback?.Invoke(true);
             });

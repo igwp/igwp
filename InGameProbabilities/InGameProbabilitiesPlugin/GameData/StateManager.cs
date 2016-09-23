@@ -18,17 +18,17 @@ namespace InGameProbabilitiesPlugin.GameData
 
         private IDictionary<string, string> teamState;
 
-        public StateManager(long[] champIds, Tier[] leagues)
+        public StateManager(long[] champIds, Tier[] leaguesBlue, Tier[] leaguesRed)
         {
             gameTime = 0;
             championIds = champIds;
             teamState = new Dictionary<string, string>();
             Initialize();
 
-            var minMax1 = FindMinMaxLeague(leagues.Take(5).ToArray());
+            var minMax1 = FindMinMaxLeague(leaguesBlue);
             minLeague1 = TierToString(minMax1[0]);
             maxLeague1 = TierToString(minMax1[1]);
-            var minMax2 = FindMinMaxLeague(leagues.Skip(5).ToArray());
+            var minMax2 = FindMinMaxLeague(leaguesRed);
             minLeague2 = TierToString(minMax2[0]);
             maxLeague2 = TierToString(minMax2[1]);
         }

@@ -46,19 +46,20 @@ namespace InGameProbabilitiesPlugin.Network
             return JsonConvert.DeserializeObject<NetworkResponse>(response.Content.ReadAsStringAsync().Result);
         }
 
-        public long GetSummonerId(string summonerName)
+        public long[] GetSummonerIds(string[] summonerNames)
         {
-            long summonerId = 0;
             try
             {
-                summonerId = apiClient.GetSummoner(Region.na, summonerName).Id;
-            
+                return apiClient.GetSummoners(Region.na, new List<string>(summonerNames)).Select((RiotSharp.SummonerEndpoint.Summoner summoner) =>
+                {
+                    return summoner.Id;
+                }).ToArray();
             }
             catch (RiotSharpException ex)
             {
                 Console.Write(ex);
             }
-            return summonerId;
+            return null;
         }
            
         public CurrentGameResponse GetCurrentGame(long summonerId)
