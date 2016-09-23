@@ -1,0 +1,24 @@
+#blue, #red {
+    display: inline-block;
+    *display: inline;
+    vertical-align: top;
+}
+#blue {
+    width: 10%;
+    text-align: left;
+}
+#red {
+    width: 10%;
+    float: right;
+    text-align: right;
+}
+h2 {
+    color: mintcream;
+    font-family: Helvetica;
+    font-size: 42px;
+}
+#messages {
+    color: white;
+    text-align: center;
+    font-size: 16px;
+}

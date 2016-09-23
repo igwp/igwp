@@ -16,16 +16,18 @@
     "windows":{
       "index":{
         "file":"index.html",
-        "transparent":false,
-        "resizable":true,
+        "transparent":true,
+        "resizable":false,
         "show_in_taskbar": false,
+        "clickthrough": true,
+        "in_game_only": true,
         "size": {
-          "width": 400,
+          "width": 900,
           "height": 400
         },
         "start_position": {
-          "Top": 100,
-          "Left": 300
+          "Top": 65,
+          "Left": 65
         }
       }
     },
