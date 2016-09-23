@@ -62,7 +62,7 @@ namespace InGameProbabilitiesPlugin
                                 if (time.AddSeconds(1) < DateTime.Now)
                                 {
                                     var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
-                                    WinChance = result.team2;
+                                    WinChance = result.team1;
                                     time = DateTime.Now;
                                 }
                             }

@@ -41,6 +41,15 @@ plugin.initialize(function(status) {
 });
 
 function registerEvents()   {
+    overwolf.games.onGameInfoUpdated.addListener(function(info) {
+        if(info && info.gameInfo)   {
+            if(!info.gameInfo.isRunning)    {
+                overwolf.windows.getCurrentWindow(function(result)  {
+                    overwolf.windows.close(result.window.id);
+                });
+            }
+        }
+    });
     overwolf.games.events.onError.addListener(function(info)    {
         console.log("Error: " + JSON.stringify(info));
     });
