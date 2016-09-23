@@ -19,6 +19,12 @@ namespace InGameProbabilitiesPlugin
         
         private Task listeningTask;
 
+        private double winChange;
+
+        public string[] SummonerName { get; set; }
+
+        public double WinChance { get; }
+
         public void StartApp(Action<object> callback)
         {
             Task.Run(() =>
@@ -26,7 +32,7 @@ namespace InGameProbabilitiesPlugin
                 var listener = new GameEventListener(7000);
                 var transpiler = new MessageTranspiler();
                 var stateManager = new StateManager();
-                var networkInterface = new NetworkInterface("http://127.0.0.1", 3000);
+                var networkInterface = new NetworkInterface("http://54.183.147.234", 3000);
 
                 var injector = new LeagueInjectionManager();
                 
