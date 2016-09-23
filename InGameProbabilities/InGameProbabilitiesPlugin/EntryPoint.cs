@@ -19,11 +19,16 @@ namespace InGameProbabilitiesPlugin
         
         private Task listeningTask;
 
-        private double winChange;
+        private double winChance;
 
-        public string[] SummonerName { get; set; }
+        private NetworkInterface networkInterface;
 
-        public double WinChance { get; }
+        private StateManager stateManager;
+
+        public EntryPoint()
+        {
+            networkInterface = new NetworkInterface("http://54.183.147.234", 3000, "RGAPI-e4491f0b-b99a-49c4-b817-5f9b00267da1");
+        }
 
         public void StartApp(Action<object> callback)
         {
@@ -31,8 +36,6 @@ namespace InGameProbabilitiesPlugin
             {
                 var listener = new GameEventListener(7000);
                 var transpiler = new MessageTranspiler();
-                var stateManager = new StateManager();
-                var networkInterface = new NetworkInterface("http://54.183.147.234", 3000);
 
                 var injector = new LeagueInjectionManager();
                 
@@ -77,6 +80,20 @@ namespace InGameProbabilitiesPlugin
                 callback?.Invoke(true);
             });
 
+        }
+
+        public void InitializeState(string summonerName)
+        {
+            var summonerId = networkInterface.GetSummonerId(summonerName);
+            var currentGame = networkInterface.GetCurrentGame(summonerId);
+            var leagues = networkInterface.GetRank(currentGame.summonerIds);
+
+            stateManager = new StateManager(currentGame.championIds, leagues);
+        }
+
+        public double GetProbability()
+        {
+            return winChance;
         }
 
         public void printMessages(GameMessage[] messages)
