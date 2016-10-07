@@ -32,27 +32,20 @@ object BuildDataset {
     fileWriter.write(headerLine)
 
     val timer = new JavaTimer(isDaemon = false)
-    lazy val task: TimerTask = timer.schedule(Duration.fromSeconds(1)) {
+    lazy val task: TimerTask = timer.schedule(Duration.fromMilliseconds(200)) {
       val url = urlsQeueue.dequeue()
       val matchDetail = decode[MatchDetail](Source.fromURL(url).mkString)
       matchDetail match {
         case Xor.Right(md) =>
           val examples = md.toExamples
-          if (urlsQeueue.isEmpty) {
-            task.cancel()
-            timer.stop()
-            examples.foreach(ex => fileWriter.write(s"${ex.toCsvString}\n"))
-            fileWriter.close()
-          } else {
-            examples.foreach(ex => fileWriter.write(s"${ex.toCsvString}\n"))
-          }
+          examples.foreach(ex => fileWriter.write(s"${ex.toCsvString}\n"))
         case Xor.Left(e) =>
           println(s"couldn't retrieve match detail data $e")
-          if (urlsQeueue.isEmpty) {
-            task.cancel()
-            timer.stop()
-            fileWriter.close()
-          }
+      }
+      if (urlsQeueue.isEmpty) {
+        task.cancel()
+        timer.stop()
+        fileWriter.close()
       }
     }
     require(task != null)
