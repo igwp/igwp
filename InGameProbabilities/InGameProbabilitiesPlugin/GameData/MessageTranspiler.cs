@@ -15,16 +15,16 @@ namespace InGameProbabilitiesPlugin.GameData
         Kills,
         Deaths,
         Assists,
-        ChampLevels,
+        ChampLvls,
         Gold,
         MinionKills
     }
 
     public enum TeamID
     {
-        Blue = 0,
-        Red = 1,
-        None = -1
+        None,
+        Blue,
+        Red
     }
 
     public class GameMessage
@@ -74,7 +74,7 @@ namespace InGameProbabilitiesPlugin.GameData
             messageMap.Add(MessageType.Kills, "Kills");
             messageMap.Add(MessageType.Deaths, "Deaths");
             messageMap.Add(MessageType.Assists, "Assists");
-            messageMap.Add(MessageType.ChampLevels, "Level");
+            messageMap.Add(MessageType.ChampLvls, "Level");
             messageMap.Add(MessageType.Gold, "GoldTotal");
             messageMap.Add(MessageType.MinionKills, "MinionKills");
         }
@@ -141,6 +141,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         }
 
                         dragonKills[teamId] = val;
+                        teamId++;
                         var message = new GameMessage
                         {
                             teamId = (TeamID)teamId,
@@ -154,6 +155,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         var teamId = Int32.Parse("" + token.Last());
                         var val = Int32.Parse(tokens[++i]);
                         towerKills[teamId] = val;
+                        teamId++;
                         var message = new GameMessage
                         {
                             teamId = (TeamID) teamId,
@@ -204,7 +206,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.ChampLevels]))
+                    else if (token.StartsWith(messageMap[MessageType.ChampLvls]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
@@ -213,7 +215,7 @@ namespace InGameProbabilitiesPlugin.GameData
                         var message = new GameMessage
                         {
                             teamId = teamId,
-                            type = MessageType.ChampLevels,
+                            type = MessageType.ChampLvls,
                             value = SumValuesByTeam(teamId, champLevels)
                         };
                         result.Add(message);

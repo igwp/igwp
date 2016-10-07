@@ -110,7 +110,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)extern\*.dll" "$(OutDir)" /y
-xcopy "$(OutDir)*.dll" "$(SolutionDir)InGameProbabilitiesApp" /y</PostBuildEvent>
+xcopy "$(OutDir)*.dll" "$(SolutionDir)InGameProbabilitiesApp" /y
+xcopy "$(OutDir)*.pdb" "$(SolutionDir)InGameProbabilitiesApp" /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

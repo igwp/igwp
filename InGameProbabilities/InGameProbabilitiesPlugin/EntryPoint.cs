@@ -49,10 +49,9 @@ namespace InGameProbabilitiesPlugin
                     {
                         try
                         {
-                            var count = 0;
+                            var time = DateTime.Now;
                             while (!this.tokenSource.IsCancellationRequested)
                             {
-                                count++;
                                 var rawMessage = listener.GetMessage();
                                 var messages = transpiler.Translate(rawMessage);
                                 foreach (var message in messages)
@@ -60,11 +59,11 @@ namespace InGameProbabilitiesPlugin
                                     stateManager.UpdateState(message);
                                 }
 
-                                if (count > 50)
+                                if (time.AddSeconds(1) < DateTime.Now)
                                 {
                                     var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
-                                    Console.WriteLine("Probability: " + result.probability);
-                                    count = 0;
+                                    WinChance = result.team1;
+                                    time = DateTime.Now;
                                 }
                             }
                         }
@@ -85,21 +84,43 @@ namespace InGameProbabilitiesPlugin
         {
             Task.Run(() =>
             {
-                var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
-                var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
-                var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
-                var leaguesRed = networkInterface.GetRank(summonerIdsRed);
+                //var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
+                //var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
+                //var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
+                //var leaguesRed = networkInterface.GetRank(summonerIdsRed);
                 var championIds = networkInterface.GetChampionIds(championNames);
 
-                stateManager = new StateManager(championIds, leaguesBlue, leaguesRed);
+                stateManager = new StateManager(championIds, null, null);
 
                 callback?.Invoke(true);
             });
         }
 
-        public double BlueWinChance => winChance;
+        private double WinChance
+        {
+            get
+            {
+                return winChance;
+            }
+            set
+            {
+                if (Math.Abs(value - winChance) > double.Epsilon)
+                {
+                    winChance = value;
+                    WinChanceChanged?.Invoke(this.BlueWinChance, this.RedWinChange);
+                }
+            }
+        }
 
-        public double RedWinChange => 1 - winChance;
+        public double BlueWinChance => this.WinChance;
+
+        public double RedWinChange => 1 - this.WinChance;
+
+        /// <summary>
+        /// Arg1 is blue teams chance
+        /// Arg2 is red teams chance
+        /// </summary>
+        public event Action<object, object> WinChanceChanged;
 
         public void printMessages(GameMessage[] messages)
         {
