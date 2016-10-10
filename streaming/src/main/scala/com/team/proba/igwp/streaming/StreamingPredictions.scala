@@ -2,7 +2,7 @@ package com.team.proba.igwp.streaming
 
 import java.util.Properties
 
-import com.github.benfradet.spark.kafka010.writer.KafkaWriter._
+import com.github.benfradet.spark.kafka010.writer._
 import com.team.proba.igwp.streaming.model.{Probability, Example}
 import io.circe.parser.decode
 import io.circe.generic.auto._
@@ -13,7 +13,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.ml.linalg.DenseVector
 import org.apache.spark.ml.tuning.CrossValidatorModel
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.{KafkaUtils, LocationStrategies, ConsumerStrategies}
 import org.apache.spark.streaming.{StreamingContext, Seconds}
 
@@ -21,9 +21,7 @@ object StreamingPredictions {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("streaming-predictions")
-    val ssc = new StreamingContext(conf, Seconds(5))
-    val sqlContext = new SQLContext(ssc.sparkContext)
-    import sqlContext.implicits._
+    val ssc = new StreamingContext(conf, Seconds(1))
 
     Logger.getRootLogger.setLevel(Level.WARN)
 
@@ -53,10 +51,13 @@ object StreamingPredictions {
       .filter(_.isDefined)
       .map(_.get)
       .transform { examplesRDD =>
+        val spark = SparkSession.builder().config(examplesRDD.sparkContext.getConf).getOrCreate()
+        import spark.implicits._
+
         val examplesDF = examplesRDD.toDF()
         val model = CrossValidatorModel
           .load("/home/ec2-user/builtModels/model")
-        val probability = model.transform(examplesDF).select("probability")
+        val probability = model.transform(examplesDF).select("probability", "prediction")
         probability.rdd.map { v =>
           val vec = v.getAs[DenseVector]("probability")
           Probability(vec(0), vec(1)).asJson.noSpaces
