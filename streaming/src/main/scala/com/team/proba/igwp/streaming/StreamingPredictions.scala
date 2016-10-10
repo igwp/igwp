@@ -57,10 +57,10 @@ object StreamingPredictions {
         val examplesDF = examplesRDD.toDF()
         val model = CrossValidatorModel
           .load("/home/ec2-user/builtModels/model")
-        val probability = model.transform(examplesDF).select("probability", "prediction")
-        probability.rdd.map { v =>
+        val probability = model.transform(examplesDF).select("probability")
+        probability.rdd.zip(examplesRDD.map(_.id)).map { case (v, id) =>
           val vec = v.getAs[DenseVector]("probability")
-          Probability(vec(0), vec(1)).asJson.noSpaces
+          Probability(id, vec(0), vec(1)).asJson.noSpaces
         }
       }
       .writeToKafka(producerConfig, s => new ProducerRecord[String, String](outputTopic, s))

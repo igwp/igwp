@@ -2,6 +2,7 @@ package com.team.proba.igwp.streaming
 
 object model {
   case class Example(
+    id: String,
     gameTimeMS: Long,
     championIds: Seq[Int],
     baronKillsTeam1: Int,
@@ -29,6 +30,7 @@ object model {
   )
 
   case class Probability(
+    id: String,
     team1: Double,
     team2: Double
   )
