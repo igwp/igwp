@@ -1,6 +1,6 @@
 lazy val sparkVersion = "2.0.0"
 lazy val circeVersion = "0.5.1"
-lazy val skrVersion = "0.2.0-SNAPSHOT"
+lazy val skrVersion = "0.2.0"
 
 lazy val compilerOptions = Seq(
   "-deprecation",
