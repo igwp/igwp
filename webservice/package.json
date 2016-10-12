@@ -11,6 +11,8 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
-    "no-kafka": "^2.8.1"
+    "no-kafka": "^2.8.1",
+    "node-uuid": "^1.4.7",
+    "promise": "^7.1.1"
   }
 }
