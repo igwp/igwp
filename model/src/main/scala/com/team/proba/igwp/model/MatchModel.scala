@@ -16,6 +16,7 @@ object MatchModel {
     }
 
     val spark = SparkSession.builder().appName("match-model").getOrCreate()
+    import spark.implicits._
 
     val examples = spark
       .read
@@ -69,7 +70,14 @@ object MatchModel {
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(3)
 
-    val cvModel = cv.fit(examples)
+    val Array(trainingData, testData) = examples.randomSplit(Array(0.7d, 0.3d))
+
+    val cvModel = cv.fit(trainingData)
+
+    val predictions = cvModel.transform(testData).select("prediction", "winner")
+    val w1Count = predictions.where($"prediction" === 0.0 && $"winner" === 200).count()
+    val w2Count = predictions.where($"prediction" === 1.0 && $"winner" === 100).count()
+    println(s"Accuracy is: ${(w1Count + w2Count) / predictions.count().toDouble}")
 
     val featureImportances = cvModel
       .bestModel.asInstanceOf[PipelineModel]
