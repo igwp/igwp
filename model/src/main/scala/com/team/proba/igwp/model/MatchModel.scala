@@ -2,7 +2,7 @@ package com.team.proba.igwp.model
 
 import org.apache.spark.ml.{PipelineModel, Pipeline}
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
-import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{VectorAssembler, StringIndexer}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.sql.SparkSession
@@ -54,14 +54,17 @@ object MatchModel {
     val randomForest = new RandomForestClassifier()
       .setLabelCol(idxdLabelCol)
       .setFeaturesCol(featuresCol)
+      .setNumTrees(22)
 
     val pipeline = new Pipeline()
       .setStages(Array(indexers: _*) ++ Array(labelIndexer, assembler, randomForest))
 
-    val evaluator = new BinaryClassificationEvaluator().setLabelCol(labelCol)
+    val evaluator = new MulticlassClassificationEvaluator()
+      .setLabelCol(idxdLabelCol)
+      .setMetricName("accuracy")
 
     val paramGrid = new ParamGridBuilder()
-      .addGrid(randomForest.impurity, Array("entropy", "gini"))
+      .addGrid(randomForest.maxDepth, Array(16, 18, 20))
       .build()
 
     val cv = new CrossValidator()
@@ -74,10 +77,9 @@ object MatchModel {
 
     val cvModel = cv.fit(trainingData)
 
-    val predictions = cvModel.transform(testData).select("prediction", "winner")
-    val w1Count = predictions.where($"prediction" === 0.0 && $"winner" === 200).count()
-    val w2Count = predictions.where($"prediction" === 1.0 && $"winner" === 100).count()
-    println(s"Accuracy is: ${(w1Count + w2Count) / predictions.count().toDouble}")
+    val predictions = cvModel.transform(testData)
+    val accuracy = evaluator.evaluate(predictions)
+    println(s"Accuracy: $accuracy")
 
     val featureImportances = cvModel
       .bestModel.asInstanceOf[PipelineModel]
@@ -91,7 +93,7 @@ object MatchModel {
       .zip(cvModel.avgMetrics)
       .maxBy(_._2)
       ._1
-    println(bestEstimatorParamMap)
+    println(s"Best params:\n$bestEstimatorParamMap")
 
     cvModel.save("src/main/resources/model")
 
