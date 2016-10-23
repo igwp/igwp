@@ -24,7 +24,6 @@ object MatchModel {
       .option("header", "true")
       .option("inferSchema", "true")
       .load(args(0))
-    examples.printSchema()
 
     val categoricalCols =
       Seq("minLeagueTeam1", "minLeagueTeam2", "maxLeagueTeam1", "maxLeagueTeam2")
@@ -64,7 +63,7 @@ object MatchModel {
       .setMetricName("accuracy")
 
     val paramGrid = new ParamGridBuilder()
-      .addGrid(randomForest.maxDepth, Array(16, 18, 20))
+      .addGrid(randomForest.maxDepth, Array(16))
       .build()
 
     val cv = new CrossValidator()
@@ -87,6 +86,7 @@ object MatchModel {
       .asInstanceOf[RandomForestClassificationModel].featureImportances
     assembler.getInputCols
       .zip(featureImportances.toArray)
+      .sortBy(-_._2)
       .foreach { case (feat, imp) => println(s"feature: $feat, importance: $imp") }
 
     val bestEstimatorParamMap = cvModel.getEstimatorParamMaps

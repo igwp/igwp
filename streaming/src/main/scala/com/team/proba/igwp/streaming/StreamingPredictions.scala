@@ -56,7 +56,7 @@ object StreamingPredictions {
 
         val examplesDF = examplesRDD.toDF()
         val model = CrossValidatorModel
-          .load("/home/ec2-user/builtModels/model")
+          .load("/home/spark/model")
         val probability = model.transform(examplesDF).select("probability")
         probability.rdd.zip(examplesRDD.map(_.id)).map { case (v, id) =>
           val vec = v.getAs[DenseVector]("probability")
