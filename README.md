@@ -4,6 +4,8 @@ This project display winning probabilities for a League of Legends game in spect
 
 ![](screenshot.png)
 
+If you want more details you can check out [this blogpost](https://benfradet.github.io/blog/2016/10/22/riot-games-2016-hackathon).
+
 ## ETL
 
 The ETL uses the [Riot Games API](https://developer.riotgames.com/) to gather match data.
