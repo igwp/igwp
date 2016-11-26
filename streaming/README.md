@@ -3,7 +3,7 @@
 ```json
 {
   "id": "some-id",
-  "gameTimeMS": 120000000000000000000,
+  "gameTimeMS": 120000,
   "championIds": [1, 2, 3],
   "baronKillsTeam1": 12,
   "baronKillsTeam2": 13,
