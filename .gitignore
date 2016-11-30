@@ -267,3 +267,11 @@ __pycache__/
 
 InGameProbabilities/InGameProbabilitiesApp/**/*.dll
 *.metagen
+/InGameProbabilities/InGameProbabilitiesApp/System.Reactive.Linq.xml
+/InGameProbabilities/InGameProbabilitiesApp/System.Reactive.Interfaces.xml
+/InGameProbabilities/InGameProbabilitiesApp/System.Reactive.Core.xml
+/InGameProbabilities/InGameProbabilitiesApp/System.Net.Http.Primitives.xml
+/InGameProbabilities/InGameProbabilitiesApp/System.Net.Http.Extensions.xml
+/InGameProbabilities/InGameProbabilitiesApp/RiotSharp.dll.config
+/InGameProbabilities/InGameProbabilitiesApp/Newtonsoft.Json.xml
+/InGameProbabilities/InGameProbabilitiesApp/InGameProbabilitiesPlugin.dll.config

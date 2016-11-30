@@ -66,6 +66,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -88,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigSettings.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="GameData\GameEventListener.cs" />
     <Compile Include="GameData\MessageTranspiler.cs" />
@@ -111,7 +113,8 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)extern\*.dll" "$(OutDir)" /y
 xcopy "$(OutDir)*.dll" "$(SolutionDir)InGameProbabilitiesApp" /y
-xcopy "$(OutDir)*.pdb" "$(SolutionDir)InGameProbabilitiesApp" /y</PostBuildEvent>
+xcopy "$(OutDir)*.pdb" "$(SolutionDir)InGameProbabilitiesApp" /y
+xcopy "$(OutDir)*.config" "$(SolutionDir)InGameProbabilitiesApp" /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

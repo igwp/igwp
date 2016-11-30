@@ -34,7 +34,7 @@ namespace InGameProbabilitiesPlugin.Network
         public NetworkInterface(string addr, int port, string key)
         {
             client = new HttpClient();
-            url = addr + ":" + port;
+            url = $"http://{addr}:{port}";
             apiKey = key;
             apiClient = RiotApi.GetInstance(apiKey);
         }

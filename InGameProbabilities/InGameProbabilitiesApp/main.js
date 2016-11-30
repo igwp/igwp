@@ -1,8 +1,13 @@
+console.log('main.js loaded...')
+
 // create an instance of the plugin
 var plugin = new OverwolfPlugin("InGameProbability", true);
 
+console.log('plugin created')
+
 // initialize it
 plugin.initialize(function(status) {
+  console.log('plugin initialize returned ' + status)
   if (status == false) {
     document.querySelector('#title').innerText = "Plugin couldn't be loaded??";
     return;
@@ -39,6 +44,8 @@ plugin.initialize(function(status) {
   plugin.get().triggerGlobalEvent();
     */
 });
+
+console.log('plugin initialize called...')
 
 function registerEvents()   {
     overwolf.games.onGameInfoUpdated.addListener(function(info) {
@@ -120,6 +127,10 @@ function initializePredictions(teams)  {
                     console.log('failed to start app!');
                 }
             });
+        }
+        else
+        {
+            console.log('failed to initialize state')
         }
     });
 }

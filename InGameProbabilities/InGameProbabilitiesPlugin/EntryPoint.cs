@@ -1,20 +1,20 @@
-﻿using System;
+﻿
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using InGameProbabilitiesPlugin.GameData;
-using InGameProbabilitiesPlugin.Network;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using InGameProbabilitiesPlugin.GameData;
 using InGameProbabilitiesPlugin.InjectionManager;
+using InGameProbabilitiesPlugin.Network;
 
 namespace InGameProbabilitiesPlugin
 {
     public class EntryPoint
     {
         private const string InjectionDll = @"LeagueReplayHook.dll";
-        
+
         private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
         
         private Task listeningTask;
@@ -25,16 +25,19 @@ namespace InGameProbabilitiesPlugin
 
         private StateManager stateManager;
 
+        private readonly ConfigSettings configuration;
+
         public EntryPoint()
         {
-            networkInterface = new NetworkInterface("http://54.183.147.234", 3000, "RGAPI-e4491f0b-b99a-49c4-b817-5f9b00267da1");
+            this.configuration = new ConfigSettings();
+            networkInterface = new NetworkInterface(this.configuration.PredictionServiceHost, this.configuration.PredictionServicePort, this.configuration.ApiKey);
         }
 
         public void StartApp(Action<object> callback)
         {
             Task.Run(() =>
             {
-                var listener = new GameEventListener(7000);
+                var listener = new GameEventListener(this.configuration.GameHookPort);
                 var transpiler = new MessageTranspiler();
                 var injector = new LeagueInjectionManager();
                 
@@ -61,8 +64,8 @@ namespace InGameProbabilitiesPlugin
 
                                 if (time.AddSeconds(1) < DateTime.Now)
                                 {
-                                    var result = networkInterface.Post("/getmodel", stateManager.GetCurrentState());
-                                    WinChance = result.team1;
+                                    var result = networkInterface?.Post("/getmodel", stateManager.GetCurrentState());
+                                    WinChance = result?.team1 ?? .5;
                                     time = DateTime.Now;
                                 }
                             }
@@ -88,7 +91,7 @@ namespace InGameProbabilitiesPlugin
                 //var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
                 //var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
                 //var leaguesRed = networkInterface.GetRank(summonerIdsRed);
-                var championIds = networkInterface.GetChampionIds(championNames);
+                var championIds = networkInterface?.GetChampionIds(championNames);
 
                 stateManager = new StateManager(championIds, null, null);
 

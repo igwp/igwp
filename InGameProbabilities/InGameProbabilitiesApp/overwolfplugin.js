@@ -1,3 +1,5 @@
+console.log('overwolfplugin.js loaded...')
+
 function OverwolfPlugin(extraObjectNameInManifest, addNameToObject) {
   var _pluginInstance = null;
   var _extraObjectName = extraObjectNameInManifest;
@@ -5,6 +7,7 @@ function OverwolfPlugin(extraObjectNameInManifest, addNameToObject) {
 
   // public
   this.initialize = function(callback) {
+    console.log('plugin initialize called...')
     return _initialize(callback);
   }
   
@@ -18,20 +21,22 @@ function OverwolfPlugin(extraObjectNameInManifest, addNameToObject) {
 
   // privates
   function _initialize(callback) {
+    console.log('private plugin initialize called')
     var proxy = null;
     
     try {
       proxy = overwolf.extensions.current.getExtraObject;
     } catch(e) {
-      console.error(
-      "overwolf.extensions.current.getExtraObject doesn't exist!");
+      console.error("overwolf.extensions.current.getExtraObject doesn't exist!");
       return callback(false);
     }
     
+    console.log('proxy set to ' + proxy)
+    
     proxy(_extraObjectName, function(result) {
+      console.log('proxy called! returned ' + _extraObjectName)
       if (result.status != "success") {
-        console.error(
-        "failed to create " + _extraObjectName + " object: " + result);
+        console.error("failed to create " + _extraObjectName + " object: " + result);
         return callback(false);
       }
       
