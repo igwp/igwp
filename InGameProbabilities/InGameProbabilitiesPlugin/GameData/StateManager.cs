@@ -1,29 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RiotSharp.LeagueEndpoint;
-
+﻿
 namespace InGameProbabilitiesPlugin.GameData
 {
-    public class StateManager
+    using System;
+    using System.Linq;
+    using RiotSharp.LeagueEndpoint;
+
+    internal class StateManager
     {
-        private int gameTime;
-        private long[] championIds;
-        private string maxLeague1;
-        private string maxLeague2;
-        private string minLeague1;
-        private string minLeague2;
+        public GameState GameState { get; }
 
-        private IDictionary<string, object> teamState;
-
-        public StateManager(long[] champIds, Tier[] leaguesBlue, Tier[] leaguesRed)
+        public StateManager(int[] champIds, Tier[] leaguesBlue, Tier[] leaguesRed)
         {
-            gameTime = 0;
-            championIds = champIds;
-            teamState = new Dictionary<string, object>();
-            Initialize();
+            this.GameState = new GameState
+            {
+                championIds = champIds
+            };
+
+            this.Initialize();
 
             //var minMax1 = FindMinMaxLeague(leaguesBlue);
             //minLeague1 = TierToString(minMax1[0]);
@@ -35,35 +28,22 @@ namespace InGameProbabilitiesPlugin.GameData
 
         private void Initialize()
         {
-            teamState["baronKillsTeam1"] = 0;
-            teamState["baronKillsTeam2"] = 0;
-            teamState["dragonKillsTeam1"] = 0;
-            teamState["dragonKillsTeam2"] = 0;
-            teamState["towerKillsTeam1"] = 0;
-            teamState["towerKillsTeam2"] = 0;
-            teamState["killsTeam1"] = 0;
-            teamState["killsTeam2"] = 0;
-            teamState["deathsTeam1"] = 0;
-            teamState["deathsTeam2"] = 0;
-            teamState["assistsTeam1"] = 0;
-            teamState["assistsTeam2"] = 0;
-            teamState["champLvlsTeam1"] = 0;
-            teamState["champLvlsTeam2"] = 0;
-            teamState["goldTeam1"] = 0;
-            teamState["goldTeam2"] = 0;
-            teamState["minionKillsTeam1"] = 0;
-            teamState["minionKillsTeam2"] = 0;
+            // Models have only seen diamond labels
+            this.GameState.minLeagueTeam1 = "DIAMOND";
+            this.GameState.maxLeagueTeam1 = "DIAMOND";
+            this.GameState.minLeagueTeam2 = "DIAMOND";
+            this.GameState.maxLeagueTeam2 = "DIAMOND";
         }
 
         public string TierToString(Tier tier)
         {
             return tier.ToString().ToUpper();
         }
-        
+
         public Tier[] FindMinMaxLeague(Tier[] leagues)
         {
             // bad. dont do this.
-            Tier[] minMax = new Tier[2];
+            var minMax = new Tier[2];
 
             if (leagues.Contains(Tier.Unranked))
                 minMax[0] = Tier.Unranked;
@@ -94,7 +74,7 @@ namespace InGameProbabilitiesPlugin.GameData
                 minMax[1] = Tier.Gold;
             else if (leagues.Contains(Tier.Silver))
                 minMax[1] = Tier.Silver;
-            else if(leagues.Contains(Tier.Bronze))
+            else if (leagues.Contains(Tier.Bronze))
                 minMax[1] = Tier.Bronze;
             else
                 minMax[1] = Tier.Unranked;
@@ -104,34 +84,83 @@ namespace InGameProbabilitiesPlugin.GameData
 
         public void UpdateState(GameMessage message)
         {
-            if (message.type == MessageType.GameTime)
+            switch (message.teamId)
             {
-                gameTime = message.value;
+                case TeamID.Blue:
+                    switch (message.type)
+                    {
+                        case MessageType.BaronKills:
+                            this.GameState.baronKillsTeam1 = message.value;
+                            break;
+                        case MessageType.DragonKills:
+                            this.GameState.dragonKillsTeam1 = message.value;
+                            break;
+                        case MessageType.TowerKills:
+                            this.GameState.towerKillsTeam1 = message.value;
+                            break;
+                        case MessageType.Kills:
+                            this.GameState.killsTeam1 = message.value;
+                            break;
+                        case MessageType.Deaths:
+                            this.GameState.deathsTeam1 = message.value;
+                            break;
+                        case MessageType.Assists:
+                            this.GameState.assistsTeam1 = message.value;
+                            break;
+                        case MessageType.ChampLvls:
+                            this.GameState.champLvlsTeam1 = message.value;
+                            break;
+                        case MessageType.Gold:
+                            this.GameState.goldTeam1 = message.value;
+                            break;
+                        case MessageType.MinionKills:
+                            this.GameState.minionKillsTeam1 = message.value;
+                            break;
+                    }
+                    break;
+                case TeamID.Red:
+                    switch (message.type)
+                    {
+                        case MessageType.BaronKills:
+                            this.GameState.baronKillsTeam2 = message.value;
+                            break;
+                        case MessageType.DragonKills:
+                            this.GameState.dragonKillsTeam2 = message.value;
+                            break;
+                        case MessageType.TowerKills:
+                            this.GameState.towerKillsTeam2 = message.value;
+                            break;
+                        case MessageType.Kills:
+                            this.GameState.killsTeam2 = message.value;
+                            break;
+                        case MessageType.Deaths:
+                            this.GameState.deathsTeam2 = message.value;
+                            break;
+                        case MessageType.Assists:
+                            this.GameState.assistsTeam2 = message.value;
+                            break;
+                        case MessageType.ChampLvls:
+                            this.GameState.champLvlsTeam2 = message.value;
+                            break;
+                        case MessageType.Gold:
+                            this.GameState.goldTeam2 = message.value;
+                            break;
+                        case MessageType.MinionKills:
+                            this.GameState.minionKillsTeam2 = message.value;
+                            break;
+                    }
+                    break;
+                case TeamID.None:
+                    switch (message.type)
+                    {
+                        case MessageType.GameTime:
+                            this.GameState.gameTimeMS = $"{message.value}";
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else if (message.type == MessageType.BaronKills)
-            {
-                // Do nothing for now
-            }
-            else
-            {
-                var name = message.type + "Team";
-                name = char.ToLower(name[0]) + name.Substring(1);
-                var key = name + ((int)message.teamId);
-                teamState[key] = message.value;
-            }
-        }
-
-        public IDictionary<string, object> GetCurrentState()
-        {
-            var result = new Dictionary<string, object>(teamState);
-            result["gameTimeMS"] = "" + gameTime;
-            result["championIds"] = championIds;
-            // Models have only seen diamond labels
-            result["minLeagueTeam1"] = "DIAMOND";
-            result["maxLeagueTeam1"] = "DIAMOND";
-            result["minLeagueTeam2"] = "DIAMOND";
-            result["maxLeagueTeam2"] = "DIAMOND";
-            return result;
         }
     }
 }

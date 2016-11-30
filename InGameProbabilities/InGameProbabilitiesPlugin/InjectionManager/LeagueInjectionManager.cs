@@ -1,24 +1,20 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Management;
-using System.Text;
-
+﻿
 namespace InGameProbabilitiesPlugin.InjectionManager
 {
-    class LeagueInjectionManager
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Management;
+    using System.Text;
+
+    internal class LeagueInjectionManager
     {
         public const string LeagueClientName = "League of Legends";
 
         private const string SpectatorCommandLineFlag = "spectator";
 
-        public LeagueInjectionManager()
-        {
-            
-        }
-
         public bool Inject(string dllName)
         {
-            var processes = Process.GetProcessesByName(LeagueClientName);
+            var processes = Process.GetProcessesByName(LeagueInjectionManager.LeagueClientName);
 
             if (processes.Length != 1)
             {
@@ -27,7 +23,7 @@ namespace InGameProbabilitiesPlugin.InjectionManager
 
             var league = processes.First();
 
-            if(!league.GetCommandLine().Contains(SpectatorCommandLineFlag))
+            if(!league.GetCommandLine().Contains(LeagueInjectionManager.SpectatorCommandLineFlag))
             {
                 return false;
             }
@@ -36,7 +32,7 @@ namespace InGameProbabilitiesPlugin.InjectionManager
         }
     }
 
-    static class ProcessExt
+    internal static class ProcessExt
     {
         public static string GetCommandLine(this Process process)
         {

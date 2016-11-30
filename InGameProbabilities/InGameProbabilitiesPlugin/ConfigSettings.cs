@@ -3,7 +3,6 @@ namespace InGameProbabilitiesPlugin
 {
     using System;
     using System.Configuration;
-    using System.IO;
     using System.Reflection;
 
     internal class ConfigSettings
@@ -31,10 +30,11 @@ namespace InGameProbabilitiesPlugin
             try
             {
                 var settings = config.AppSettings;
-                this.PredictionServiceHost = settings.Settings[PredictionServiceHostKey].Value;
-                this.PredictionServicePort = ushort.Parse(settings.Settings[PredictionServicePortKey].Value);
-                this.ApiKey = settings.Settings[ApiKeyKey].Value;
-                this.GameHookPort = ushort.Parse(settings.Settings[GameHookPortKey].Value);
+
+                this.PredictionServiceHost = settings.Settings[ConfigSettings.PredictionServiceHostKey].Value;
+                this.PredictionServicePort = ushort.Parse(settings.Settings[ConfigSettings.PredictionServicePortKey].Value);
+                this.ApiKey = settings.Settings[ConfigSettings.ApiKeyKey].Value;
+                this.GameHookPort = ushort.Parse(settings.Settings[ConfigSettings.GameHookPortKey].Value);
             }
             catch (InvalidCastException e)
             {

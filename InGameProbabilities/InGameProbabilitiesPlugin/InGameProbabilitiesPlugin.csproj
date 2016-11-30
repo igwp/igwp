@@ -92,6 +92,7 @@
     <Compile Include="ConfigSettings.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="GameData\GameEventListener.cs" />
+    <Compile Include="GameData\GameState.cs" />
     <Compile Include="GameData\MessageTranspiler.cs" />
     <Compile Include="GameData\StateManager.cs" />
     <Compile Include="Network\NetworkInterface.cs" />

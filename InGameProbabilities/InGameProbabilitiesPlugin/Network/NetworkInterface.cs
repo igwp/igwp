@@ -1,104 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Net.Http.Headers;
-using RiotSharp;
-using RiotSharp.LeagueEndpoint;
-
+﻿
 namespace InGameProbabilitiesPlugin.Network
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using System.Threading.Tasks;
+    using GameData;
+    using Newtonsoft.Json;
+    using RiotSharp;
+    using RiotSharp.LeagueEndpoint;
+
     public class NetworkResponse
     {
-        public double team1;
-        public double team2;
+        public double team1 { get; set; }
+        public double team2 { get; set; }
     }
 
     public class CurrentGameResponse
     {
-        public long[] summonerIds;
-        public long[] championIds;
+        public long[] summonerIds { get; set; }
+        public long[] championIds { get; set; }
     }
 
-    public class NetworkInterface
+    internal class NetworkInterface
     {
-        private HttpClient client;
-        private string url;
-        private RiotApi apiClient;
-        private string apiKey;
+        private readonly HttpClient _client;
+        private readonly string _url;
+        private readonly RiotApi _apiClient;
+        private readonly string _apiKey;
 
         public NetworkInterface(string addr, int port, string key)
         {
-            client = new HttpClient();
-            url = $"http://{addr}:{port}";
-            apiKey = key;
-            apiClient = RiotApi.GetInstance(apiKey);
+            this._client = new HttpClient();
+            this._url = $"http://{addr}:{port}";
+            this._apiKey = key;
+            this._apiClient = RiotApi.GetInstance(this._apiKey);
         }
 
-        public NetworkResponse Post(string path, IDictionary<string, object> content)
+        public async Task<NetworkResponse> GetPrediction(GameState content)
         {
             var body = JsonConvert.SerializeObject(content);
 
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var response = client.PostAsync(url + path, new StringContent(body, Encoding.UTF8, "application/json")).Result;
+            this._client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await this._client.PostAsync($"{this._url}/getmodel", new StringContent(body, Encoding.UTF8, "application/json"));
+            var serializedPrediction = await response.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<NetworkResponse>(response.Content.ReadAsStringAsync().Result);
+            return JsonConvert.DeserializeObject<NetworkResponse>(serializedPrediction);
         }
 
-        public long[] GetSummonerIds(string[] summonerNames)
+        public int[] GetChampionIds(string[] championNames)
         {
-            try
-            {
-                return apiClient.GetSummoners(Region.na, new List<string>(summonerNames)).Select((RiotSharp.SummonerEndpoint.Summoner summoner) =>
-                {
-                    return summoner.Id;
-                }).ToArray();
-            }
-            catch (RiotSharpException ex)
-            {
-                Console.Write(ex);
-            }
-            return null;
-        }
-           
-        public CurrentGameResponse GetCurrentGame(long summonerId)
-        {
-            var result = new CurrentGameResponse { summonerIds = new long[10], championIds = new long[10] };
-            try
-            {
-                var participants = apiClient.GetCurrentGame(Platform.NA1, summonerId).Participants;
-                for (var i = 0; i < participants.Count; i++)
-                {
-                    var currentParticipant = participants[i];
-                    result.summonerIds[i] = currentParticipant.SummonerId;
-                    result.championIds[i] = currentParticipant.ChampionId;
-                }
-            }
-            catch (RiotSharpException ex)
-            {
-                Console.Write(ex);
-            }
-            return result;
-        }
-
-        public long[] GetChampionIds(string[] championNames)
-        {
-            var staticApi = RiotSharp.StaticRiotApi.GetInstance(apiKey);
-            var result = new List<long>();
+            var staticApi = StaticRiotApi.GetInstance(this._apiKey);
             var champions = staticApi.GetChampions(Region.na).Champions;
 
-            foreach (var name in championNames)
-            {
-                result.Add(champions[name].Id);
-            }
-            return result.ToArray();
+            return championNames.Select(name => champions[name].Id).ToArray();
         }
 
-        public RiotSharp.LeagueEndpoint.Tier[] GetRank(long[] summonerIds)
+        public Tier[] GetRank(long[] summonerIds)
         {
             var summonerList = new List<int>();
 
@@ -109,7 +70,7 @@ namespace InGameProbabilitiesPlugin.Network
 
             try
             {
-                var participants = apiClient.GetLeagues(Region.na, summonerList);
+                var participants = this._apiClient.GetLeagues(Region.na, summonerList);
                 return summonerIds.Select((long summId) =>
                 {
                     var leagues = participants[summId];

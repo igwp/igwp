@@ -1,73 +1,78 @@
 ﻿
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using InGameProbabilitiesPlugin.GameData;
-using InGameProbabilitiesPlugin.InjectionManager;
-using InGameProbabilitiesPlugin.Network;
-
 namespace InGameProbabilitiesPlugin
 {
+    using System;
+    using System.IO;
+    using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    using GameData;
+    using InjectionManager;
+    using Network;
+
     public class EntryPoint
     {
         private const string InjectionDll = @"LeagueReplayHook.dll";
 
-        private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         
-        private Task listeningTask;
+        private Task _predictionTask;
 
-        private double winChance;
+        private Task _hookListenerTask;
 
-        private readonly NetworkInterface networkInterface;
+        private double _winChance;
 
-        private StateManager stateManager;
+        private readonly NetworkInterface _networkInterface;
 
-        private readonly ConfigSettings configuration;
+        private StateManager _stateManager;
+
+        private readonly ConfigSettings _configuration;
 
         public EntryPoint()
         {
-            this.configuration = new ConfigSettings();
-            networkInterface = new NetworkInterface(this.configuration.PredictionServiceHost, this.configuration.PredictionServicePort, this.configuration.ApiKey);
+            this._configuration = new ConfigSettings();
+            this._networkInterface = new NetworkInterface(this._configuration.PredictionServiceHost, this._configuration.PredictionServicePort, this._configuration.ApiKey);
         }
 
         public void StartApp(Action<object> callback)
         {
             Task.Run(() =>
             {
-                var listener = new GameEventListener(this.configuration.GameHookPort);
+                var listener = new GameEventListener(this._configuration.GameHookPort);
                 var transpiler = new MessageTranspiler();
                 var injector = new LeagueInjectionManager();
                 
-                var path = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{InjectionDll}";
+                var path = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{EntryPoint.InjectionDll}";
                 if (!injector.Inject(path))
                 {
                     Console.Error.WriteLine("league appears to not be running (or injection failed)!");
                 }
+
+                this._hookListenerTask = Task.Run(() =>
+                    {
+                        while (!this._tokenSource.IsCancellationRequested)
+                        {
+                            var rawMessage = listener.GetMessage();
+                            var messages = transpiler.Translate(rawMessage);
+                            foreach (var message in messages)
+                            {
+                                this._stateManager.UpdateState(message);
+                            }
+                        }
+                    },
+                    this._tokenSource.Token);
                 
-                this.listeningTask = Task.Run(
-                    () =>
+                this._predictionTask = Task.Run(async () =>
                     {
                         try
                         {
-                            var time = DateTime.Now;
-                            while (!this.tokenSource.IsCancellationRequested)
+                            while (!this._tokenSource.IsCancellationRequested)
                             {
-                                var rawMessage = listener.GetMessage();
-                                var messages = transpiler.Translate(rawMessage);
-                                foreach (var message in messages)
-                                {
-                                    stateManager.UpdateState(message);
-                                }
+                                await Task.Delay(1000, this._tokenSource.Token);
 
-                                if (time.AddSeconds(1) < DateTime.Now)
-                                {
-                                    var result = networkInterface?.Post("/getmodel", stateManager.GetCurrentState());
-                                    WinChance = result?.team1 ?? .5;
-                                    time = DateTime.Now;
-                                }
+                                var result = await this._networkInterface.GetPrediction(this._stateManager.GameState);
+                                this.WinChance = result?.team1 ?? .5;
                             }
                         }
                         catch (Exception e)
@@ -76,7 +81,7 @@ namespace InGameProbabilitiesPlugin
                         }
 
                     },
-                    this.tokenSource.Token);
+                    this._tokenSource.Token);
 
                 callback?.Invoke(true);
             });
@@ -91,9 +96,9 @@ namespace InGameProbabilitiesPlugin
                 //var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
                 //var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
                 //var leaguesRed = networkInterface.GetRank(summonerIdsRed);
-                var championIds = networkInterface?.GetChampionIds(championNames);
+                var championIds = this._networkInterface?.GetChampionIds(championNames);
 
-                stateManager = new StateManager(championIds, null, null);
+                this._stateManager = new StateManager(championIds, null, null);
 
                 callback?.Invoke(true);
             });
@@ -103,14 +108,14 @@ namespace InGameProbabilitiesPlugin
         {
             get
             {
-                return winChance;
+                return this._winChance;
             }
             set
             {
-                if (Math.Abs(value - winChance) > double.Epsilon)
+                if (Math.Abs(value - this._winChance) > double.Epsilon)
                 {
-                    winChance = value;
-                    WinChanceChanged?.Invoke(this.BlueWinChance, this.RedWinChange);
+                    this._winChance = value;
+                    this.WinChanceChanged?.Invoke(this.BlueWinChance, this.RedWinChange);
                 }
             }
         }
@@ -124,15 +129,5 @@ namespace InGameProbabilitiesPlugin
         /// Arg2 is red teams chance
         /// </summary>
         public event Action<object, object> WinChanceChanged;
-
-        public void printMessages(GameMessage[] messages)
-        {
-            foreach (var message in messages)
-            {
-                var teamId = Enum.GetName(typeof(TeamID), message.teamId);
-                var type = Enum.GetName(typeof(MessageType), message.type);
-                Console.WriteLine("Team: {0}, Type: {1}, Value: {2}", teamId, type, message.value);
-            }
-        }
     }
 }

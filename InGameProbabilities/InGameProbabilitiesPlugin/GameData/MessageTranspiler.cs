@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace InGameProbabilitiesPlugin.GameData
 {
-    public enum MessageType
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    internal enum MessageType
     {
         GameTime,
         BaronKills,
@@ -20,69 +19,69 @@ namespace InGameProbabilitiesPlugin.GameData
         MinionKills
     }
 
-    public enum TeamID
+    internal enum TeamID
     {
         None,
         Blue,
         Red
     }
 
-    public class GameMessage
+    internal class GameMessage
     {
         public MessageType type;
         public TeamID teamId;
         public int value;
     }
 
-    public class MessageTranspiler
+    internal class MessageTranspiler
     {
-        private IDictionary<MessageType, string> messageMap;
+        private readonly IDictionary<MessageType, string> _messageMap;
         private int[] baronKills;
         private double lastBaronTimes;
-        private int[] dragonKills;
-        private int[] towerKills;
-        private int[] kills;
-        private int[] deaths;
-        private int[] assists;
-        private int[] champLevels;
-        private int[] goldTotal;
-        private int[] minionKills;
+        private readonly int[] _dragonKills;
+        private readonly int[] _towerKills;
+        private readonly int[] _kills;
+        private readonly int[] _deaths;
+        private readonly int[] _assists;
+        private readonly int[] _champLevels;
+        private readonly int[] _goldTotal;
+        private readonly int[] _minionKills;
 
         public MessageTranspiler()
         {
-            baronKills = new int[2];
-            lastBaronTimes = Double.MaxValue;
-            dragonKills = new int[2];
-            towerKills = new int[2];
-            kills = new int[10];
-            deaths = new int[10];
-            assists = new int[10];
-            champLevels = new int[10];
-            goldTotal = new int[10];
-            minionKills = new int[10];
+            this.baronKills = new int[2];
+            this.lastBaronTimes = Double.MaxValue;
+            this._dragonKills = new int[2];
+            this._towerKills = new int[2];
+            this._kills = new int[10];
+            this._deaths = new int[10];
+            this._assists = new int[10];
+            this._champLevels = new int[10];
+            this._goldTotal = new int[10];
+            this._minionKills = new int[10];
 
-            messageMap = new Dictionary<MessageType, string>();
-            Initialize();
+            this._messageMap = new Dictionary<MessageType, string>();
+            this.Initialize();
         }
 
         private void Initialize()
         {
-            messageMap.Add(MessageType.GameTime, "GameTime");
-            messageMap.Add(MessageType.BaronKills, "BaronTime");
-            messageMap.Add(MessageType.DragonKills, "DragonBuffs");
-            messageMap.Add(MessageType.TowerKills, "TowerKills");
-            messageMap.Add(MessageType.Kills, "Kills");
-            messageMap.Add(MessageType.Deaths, "Deaths");
-            messageMap.Add(MessageType.Assists, "Assists");
-            messageMap.Add(MessageType.ChampLvls, "Level");
-            messageMap.Add(MessageType.Gold, "GoldTotal");
-            messageMap.Add(MessageType.MinionKills, "MinionKills");
+            this._messageMap.Add(MessageType.GameTime, "GameTime");
+            this._messageMap.Add(MessageType.BaronKills, "BaronTime");
+            this._messageMap.Add(MessageType.DragonKills, "DragonBuffs");
+            this._messageMap.Add(MessageType.TowerKills, "TowerKills");
+            this._messageMap.Add(MessageType.Kills, "Kills");
+            this._messageMap.Add(MessageType.Deaths, "Deaths");
+            this._messageMap.Add(MessageType.Assists, "Assists");
+            this._messageMap.Add(MessageType.ChampLvls, "Level");
+            this._messageMap.Add(MessageType.Gold, "GoldTotal");
+            this._messageMap.Add(MessageType.MinionKills, "MinionKills");
         }
 
-        private int SumValuesByTeam(TeamID teamId, int[] data)
+        private static int SumValuesByTeam(TeamID teamId, int[] data)
         {
             var start = teamId == TeamID.Blue ? 0 : 5;
-            int result = 0;
+            var result = 0;
             for (var i = 0; i < 5; i++)
             {
                 result += data[start + i];
@@ -103,7 +102,7 @@ namespace InGameProbabilitiesPlugin.GameData
                 for (var i = 1; i < tokens.Length; i++)
                 {
                     var token = tokens[i];
-                    if (token.StartsWith(messageMap[MessageType.GameTime]))
+                    if (token.StartsWith(this._messageMap[MessageType.GameTime]))
                     {
                         var time = Int32.Parse(tokens[++i]);
                         var message = new GameMessage
@@ -114,15 +113,15 @@ namespace InGameProbabilitiesPlugin.GameData
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.BaronKills]))
+                    else if (token.StartsWith(this._messageMap[MessageType.BaronKills]))
                     {
                         // TODO: Determine team
                         var time = Double.Parse(token.Split('_')[1]);
-                        if (time < lastBaronTimes)
+                        if (time < this.lastBaronTimes)
                         {
                             continue;
                         }
-                        lastBaronTimes = time;
+                        this.lastBaronTimes = time;
                         var message = new GameMessage
                         {
                             teamId = TeamID.None,
@@ -131,16 +130,16 @@ namespace InGameProbabilitiesPlugin.GameData
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.DragonKills]))
+                    else if (token.StartsWith(this._messageMap[MessageType.DragonKills]))
                     {
                         var teamId = Int32.Parse(token.Split('_')[1]);
                         var val = Int32.Parse(tokens[++i]);
-                        if (dragonKills[teamId] == val)
+                        if (this._dragonKills[teamId] == val)
                         {
                             continue;
                         }
 
-                        dragonKills[teamId] = val;
+                        this._dragonKills[teamId] = val;
                         teamId++;
                         var message = new GameMessage
                         {
@@ -150,11 +149,11 @@ namespace InGameProbabilitiesPlugin.GameData
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.TowerKills]))
+                    else if (token.StartsWith(this._messageMap[MessageType.TowerKills]))
                     {
                         var teamId = Int32.Parse("" + token.Last());
                         var val = Int32.Parse(tokens[++i]);
-                        towerKills[teamId] = val;
+                        this._towerKills[teamId] = val;
                         teamId++;
                         var message = new GameMessage
                         {
@@ -164,87 +163,87 @@ namespace InGameProbabilitiesPlugin.GameData
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.Kills]))
+                    else if (token.StartsWith(this._messageMap[MessageType.Kills]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        kills[playerId] = Int32.Parse(tokens[++i]);
+                        this._kills[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.Kills,
-                            value = SumValuesByTeam(teamId, kills)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._kills)
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.Deaths]))
+                    else if (token.StartsWith(this._messageMap[MessageType.Deaths]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        deaths[playerId] = Int32.Parse(tokens[++i]);
+                        this._deaths[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.Deaths,
-                            value = SumValuesByTeam(teamId, deaths)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._deaths)
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.Assists]))
+                    else if (token.StartsWith(this._messageMap[MessageType.Assists]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        assists[playerId] = Int32.Parse(tokens[++i]);
+                        this._assists[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.Assists,
-                            value = SumValuesByTeam(teamId, assists)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._assists)
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.ChampLvls]))
+                    else if (token.StartsWith(this._messageMap[MessageType.ChampLvls]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        champLevels[playerId] = Int32.Parse(tokens[++i]);
+                        this._champLevels[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.ChampLvls,
-                            value = SumValuesByTeam(teamId, champLevels)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._champLevels)
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.Gold]))
+                    else if (token.StartsWith(this._messageMap[MessageType.Gold]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        goldTotal[playerId] = Int32.Parse(tokens[++i]);
+                        this._goldTotal[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.Gold,
-                            value = SumValuesByTeam(teamId, goldTotal)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._goldTotal)
                         };
                         result.Add(message);
                     }
-                    else if (token.StartsWith(messageMap[MessageType.MinionKills]))
+                    else if (token.StartsWith(this._messageMap[MessageType.MinionKills]))
                     {
                         var playerId = Int32.Parse(token.Split('_')[1]);
                         var teamId = playerId < 5 ? TeamID.Blue : TeamID.Red;
-                        minionKills[playerId] = Int32.Parse(tokens[++i]);
+                        this._minionKills[playerId] = Int32.Parse(tokens[++i]);
 
                         var message = new GameMessage
                         {
                             teamId = teamId,
                             type = MessageType.MinionKills,
-                            value = SumValuesByTeam(teamId, minionKills)
+                            value = MessageTranspiler.SumValuesByTeam(teamId, this._minionKills)
                         };
                         result.Add(message);
                     }
