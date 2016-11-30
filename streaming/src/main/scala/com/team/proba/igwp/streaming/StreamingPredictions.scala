@@ -13,7 +13,6 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.ml.linalg.DenseVector
 import org.apache.spark.ml.tuning.CrossValidatorModel
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.{KafkaUtils, LocationStrategies, ConsumerStrategies}
 import org.apache.spark.streaming.{StreamingContext, Seconds}
 
@@ -28,7 +27,7 @@ object StreamingPredictions {
     val inputTopic = "game-state"
     val kafkaParams = Map(
       "bootstrap.servers" -> "localhost:9092",
-      "auto.offset.reset" -> "earliest",
+      "auto.offset.reset" -> "latest",
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[StringDeserializer],
       "group.id" -> "spark-consumer"
@@ -42,6 +41,9 @@ object StreamingPredictions {
       p.setProperty("value.serializer", classOf[StringSerializer].getName)
       p
     }
+    val model = CrossValidatorModel
+      .load("/home/ec2-user/streaming-job/model")
+    val modelBC = ssc.sparkContext.broadcast(model)
 
     KafkaUtils.createDirectStream[String, String](
       ssc,
@@ -51,13 +53,11 @@ object StreamingPredictions {
       .filter(_.isDefined)
       .map(_.get)
       .transform { examplesRDD =>
-        val spark = SparkSession.builder().config(examplesRDD.sparkContext.getConf).getOrCreate()
+        val spark = SparkSessionSingleton.getInstance(examplesRDD.sparkContext.getConf)
         import spark.implicits._
 
         val examplesDF = examplesRDD.toDF()
-        val model = CrossValidatorModel
-          .load("/home/spark/model")
-        val probability = model.transform(examplesDF).select("probability")
+        val probability = modelBC.value.transform(examplesDF).select("probability")
         probability.rdd.zip(examplesRDD.map(_.id)).map { case (v, id) =>
           val vec = v.getAs[DenseVector]("probability")
           Probability(id, vec(0), vec(1)).asJson.noSpaces

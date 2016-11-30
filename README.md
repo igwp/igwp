@@ -1,6 +1,6 @@
 # In-game winning probabilities
 
-This project display winning probabilities for a League of Legends game in spectator mode in real-time.
+This project displays winning probabilities for a League of Legends game in spectator mode in real-time.
 
 ![](screenshot.png)
 
@@ -12,7 +12,7 @@ The ETL uses the [Riot Games API](https://developer.riotgames.com/) to gather ma
 
 ## Model
 
-A classifier (random forest) is built using [Apache Spark](http://spark.apache.org/) and the data previously collected.
+A classifier (random forest) is built using [Apache Spark](http://spark.apache.org/) on the data previously collected.
 
 ## Streaming app
 
