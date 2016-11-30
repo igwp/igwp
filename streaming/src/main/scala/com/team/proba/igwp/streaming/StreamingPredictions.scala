@@ -60,7 +60,7 @@ object StreamingPredictions {
         val probability = modelBC.value.transform(examplesDF).select("probability")
         probability.rdd.zip(examplesRDD.map(_.id)).map { case (v, id) =>
           val vec = v.getAs[DenseVector]("probability")
-          Probability(id, vec(0), vec(1)).asJson.noSpaces
+          Probability(id, vec(1), vec(0)).asJson.noSpaces
         }
       }
       .writeToKafka(producerConfig, s => new ProducerRecord[String, String](outputTopic, s))
