@@ -2,28 +2,21 @@
 namespace InGameProbabilitiesPlugin.GameData
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
-    using RiotSharp.LeagueEndpoint;
 
     internal class StateManager
     {
         public GameState GameState { get; }
 
-        public StateManager(int[] champIds, Tier[] leaguesBlue, Tier[] leaguesRed)
+        public StateManager(IEnumerable<int> champIds)
         {
             this.GameState = new GameState
             {
-                championIds = champIds
+                championIds = champIds.ToArray()
             };
 
             this.Initialize();
-
-            //var minMax1 = FindMinMaxLeague(leaguesBlue);
-            //minLeague1 = TierToString(minMax1[0]);
-            //maxLeague1 = TierToString(minMax1[1]);
-            //var minMax2 = FindMinMaxLeague(leaguesRed);
-            //minLeague2 = TierToString(minMax2[0]);
-            //maxLeague2 = TierToString(minMax2[1]);
         }
 
         private void Initialize()
@@ -33,53 +26,6 @@ namespace InGameProbabilitiesPlugin.GameData
             this.GameState.maxLeagueTeam1 = "DIAMOND";
             this.GameState.minLeagueTeam2 = "DIAMOND";
             this.GameState.maxLeagueTeam2 = "DIAMOND";
-        }
-
-        public string TierToString(Tier tier)
-        {
-            return tier.ToString().ToUpper();
-        }
-
-        public Tier[] FindMinMaxLeague(Tier[] leagues)
-        {
-            // bad. dont do this.
-            var minMax = new Tier[2];
-
-            if (leagues.Contains(Tier.Unranked))
-                minMax[0] = Tier.Unranked;
-            else if (leagues.Contains(Tier.Bronze))
-                minMax[0] = Tier.Bronze;
-            else if (leagues.Contains(Tier.Silver))
-                minMax[0] = Tier.Silver;
-            else if (leagues.Contains(Tier.Gold))
-                minMax[0] = Tier.Gold;
-            else if (leagues.Contains(Tier.Platinum))
-                minMax[0] = Tier.Platinum;
-            else if (leagues.Contains(Tier.Diamond))
-                minMax[0] = Tier.Diamond;
-            else if (leagues.Contains(Tier.Master))
-                minMax[0] = Tier.Master;
-            else
-                minMax[0] = Tier.Challenger;
-
-            if (leagues.Contains(Tier.Challenger))
-                minMax[1] = Tier.Challenger;
-            else if (leagues.Contains(Tier.Master))
-                minMax[1] = Tier.Master;
-            else if (leagues.Contains(Tier.Diamond))
-                minMax[1] = Tier.Diamond;
-            else if (leagues.Contains(Tier.Platinum))
-                minMax[1] = Tier.Platinum;
-            else if (leagues.Contains(Tier.Gold))
-                minMax[1] = Tier.Gold;
-            else if (leagues.Contains(Tier.Silver))
-                minMax[1] = Tier.Silver;
-            else if (leagues.Contains(Tier.Bronze))
-                minMax[1] = Tier.Bronze;
-            else
-                minMax[1] = Tier.Unranked;
-
-            return minMax;
         }
 
         public void UpdateState(GameMessage message)

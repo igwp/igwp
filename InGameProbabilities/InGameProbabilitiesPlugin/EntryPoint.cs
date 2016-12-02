@@ -3,6 +3,7 @@ namespace InGameProbabilitiesPlugin
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace InGameProbabilitiesPlugin
         public EntryPoint()
         {
             this._configuration = new ConfigSettings();
-            this._networkInterface = new NetworkInterface(this._configuration.PredictionServiceHost, this._configuration.PredictionServicePort, this._configuration.ApiKey);
+            this._networkInterface = new NetworkInterface(this._configuration.PredictionServiceHost, this._configuration.PredictionServicePort);
         }
 
         public void StartApp(Action<object> callback)
@@ -92,13 +93,9 @@ namespace InGameProbabilitiesPlugin
         {
             Task.Run(() =>
             {
-                //var summonerIdsBlue = networkInterface.GetSummonerIds(blueTeam);
-                //var summonerIdsRed = networkInterface.GetSummonerIds(redTeam);
-                //var leaguesBlue = networkInterface.GetRank(summonerIdsBlue);
-                //var leaguesRed = networkInterface.GetRank(summonerIdsRed);
-                var championIds = this._networkInterface?.GetChampionIds(championNames);
+                var championIds = championNames.Select(name => this._configuration.ChampIds[name]);
 
-                this._stateManager = new StateManager(championIds, null, null);
+                this._stateManager = new StateManager(championIds);
 
                 callback?.Invoke(true);
             });
