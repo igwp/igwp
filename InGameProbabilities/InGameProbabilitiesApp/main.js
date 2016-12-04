@@ -16,12 +16,6 @@ plugin.initialize(function(status) {
     plugin.get().Log.addListener(function(message) {
         console.log(message);
     });
-
-    overwolf.windows.getCurrentWindow(function(result) {
-        overwolf.windows.changePosition(result.window.id, 0, 16, function()   {
-            overwolf.windows.changeSize(result.window.id, 1920, 400, null);
-        });
-    });
 });
 
 console.log('plugin initialize called...');
@@ -31,7 +25,9 @@ function registerEvents()   {
     overwolf.games.onGameInfoUpdated.addListener(function(info) {
         console.log("got game info updated event! " + info);
         if(info && info.gameInfo)   {
-            console.log('got gameinfo event!! ' + info.gameInfo);
+            console.log('got gameinfo event!! ' + JSON.stringify(info.gameInfo));
+
+            // check if game is closed...
             if(!info.gameInfo.isRunning)    {
                 console.log("game is not running... shutting stuff down...");
                 // called when game closes
@@ -45,6 +41,19 @@ function registerEvents()   {
                 plugin.get().Reset(function(result) {
                     console.log("reset plugin... result " + result);
                 });
+            }
+
+            // set window width to resolution
+            if(info.gameInfo.width) {
+                overwolf.windows.obtainDeclaredWindow("index", function(result) {
+                    if(result && result.window && result.window.id) {
+                        overwolf.windows.changePosition(result.window.id, 0, 16, function()   {
+                            overwolf.windows.changeSize(result.window.id, info.gameInfo.width, 420, null);
+                        });
+                    }   else    {
+                        console.log("could not get window with name index... " + JSON.stringify(result));
+                    }
+                })
             }
         }
     });
@@ -138,34 +147,6 @@ setFeatures(function(success) {
             var teams = JSON.parse(decodeURIComponent(info.res.game_info.teams));
 
             initializePredictions(teams);
-        }   else    {
-            //console.log('registering for events and setting features...');
-
-            //registerEvents();
-            //setFeatures();
         }
     });
 });
-/*
-console.log("registering for onGameInfoUpdated");
-overwolf.games.onGameInfoUpdated.addListener(function(info) {
-    console.log("got game info updated event! " + JSON.stringify(info));
-    if(info && info.gameInfo)   {
-        console.log('got gameinfo event!! ' + JSON.stringify(info.gameInfo));
-        if(!info.gameInfo.isRunning)    {
-            console.log("game is not running... shutting stuff down...");
-            // called when game closes
-            // close window
-            overwolf.windows.getCurrentWindow(function(result)  {
-                overwolf.windows.close(result.window.id);
-            });
-
-            // reset plugin
-            console.log('calling reset on plugin...');
-            plugin.get().Reset(function(result) {
-                console.log("reset plugin... result " + result);
-            });
-        }
-    }
-});
-*/
