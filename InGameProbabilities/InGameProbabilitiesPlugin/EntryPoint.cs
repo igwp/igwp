@@ -16,7 +16,7 @@ namespace InGameProbabilitiesPlugin
     {
         private const string InjectionDll = @"LeagueReplayHook.dll";
 
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _tokenSource;
         
         private Task _predictionTask;
 
@@ -52,6 +52,8 @@ namespace InGameProbabilitiesPlugin
 
                 this._hookListenerTask = Task.Run(() =>
                     {
+                        this.Log?.Invoke("started listening task for league hook...");
+
                         while (!this._tokenSource.IsCancellationRequested)
                         {
                             var rawMessage = listener.GetMessage();
@@ -68,6 +70,8 @@ namespace InGameProbabilitiesPlugin
                     {
                         try
                         {
+                            this.Log?.Invoke("started task for sending predictions...");
+
                             while (!this._tokenSource.IsCancellationRequested)
                             {
                                 await Task.Delay(1000, this._tokenSource.Token);
@@ -86,18 +90,50 @@ namespace InGameProbabilitiesPlugin
 
                 callback?.Invoke(true);
             });
-
         }
 
         public void InitializeState(string[] championNames, string[] blueTeam, string[] redTeam, Action<object> callback)
         {
-            Task.Run(() =>
+            Action<object> initState = (object res) =>
             {
                 var championIds = championNames.Select(name => this._configuration.ChampIds[name]);
 
+                this._tokenSource = new CancellationTokenSource();
                 this._stateManager = new StateManager(championIds);
 
                 callback?.Invoke(true);
+            };
+
+            if (this._tokenSource != null || this._hookListenerTask != null || this._predictionTask != null)
+            {
+                this.Reset(initState);
+            }
+            else
+            {
+                Task.Run(() => initState(true));
+            }
+        }
+
+        public void Reset(Action<object> callback)
+        {
+            Task.Run(() =>
+            {
+                this.Log?.Invoke("reset called...");
+
+                this._tokenSource?.Cancel();
+                this._tokenSource?.Dispose();
+
+                this._hookListenerTask?.Wait();
+                this._predictionTask?.Wait();
+
+                this._tokenSource = null;
+                this._hookListenerTask = null;
+                this._predictionTask = null;
+
+                this.WinChance = .5;
+
+                callback?.Invoke(true);
+                this.Log?.Invoke("reset finished.");
             });
         }
 
@@ -126,5 +162,7 @@ namespace InGameProbabilitiesPlugin
         /// Arg2 is red teams chance
         /// </summary>
         public event Action<object, object> WinChanceChanged;
+
+        public event Action<object> Log;
     }
 }

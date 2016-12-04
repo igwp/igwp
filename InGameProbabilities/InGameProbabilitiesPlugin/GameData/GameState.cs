@@ -3,9 +3,9 @@ namespace InGameProbabilitiesPlugin.GameData
 {
     public class GameState
     {
-        public string gameTimeMS { get; set; }
+        public string gameTimeMS { get; set; } = "0";
 
-        public int[] championIds { get; set; }
+        public int[] championIds { get; set; } = new int[10];
 
         public int baronKillsTeam1 { get; set; }
         public int baronKillsTeam2 { get; set; }
@@ -34,10 +34,10 @@ namespace InGameProbabilitiesPlugin.GameData
         public int minionKillsTeam1 { get; set; }
         public int minionKillsTeam2 { get; set; }
 
-        public string minLeagueTeam1 { get; set; }
-        public string minLeagueTeam2 { get; set; }
+        public string minLeagueTeam1 { get; set; } = "UNRANKED";
+        public string minLeagueTeam2 { get; set; } = "UNRANKED";
 
-        public string maxLeagueTeam1 { get; set; }
-        public string maxLeagueTeam2 { get; set; }
+        public string maxLeagueTeam1 { get; set; } = "UNRANKED";
+        public string maxLeagueTeam2 { get; set; } = "UNRANKED";
     }
 }
