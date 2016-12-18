@@ -2,13 +2,13 @@
   "manifest_version":"1",
   "type":"WebApp",
   "meta":{
-    "name":"In Game Probability",
+    "name":"Winning Probability",
     "version":"1.0.0.0",
     "minimum-overwolf-version": "0.98.0.0",
-    "author":"hackathonz",
+    "author":"Team-Probability",
     "icon":"icon.png",
     "icon_gray":"icon_gray.png",
-    "description":"A plugin for predicting the chances of a team winning a game of league in spectator mode"
+    "description":"Predict which team will win a game of League of Legends from spectator mode. Works accurately for 5v5 matches on Summoners Rift."
   },
   "permissions": ["Extensions", "GameInfo"],
   "data": {
