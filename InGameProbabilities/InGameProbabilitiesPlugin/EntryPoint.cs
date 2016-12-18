@@ -48,8 +48,6 @@ namespace InGameProbabilitiesPlugin
                 if (!injector.Inject(path))
                 {
                     Console.Error.WriteLine("league appears to not be running (or injection failed)!");
-                    callback?.Invoke(false);
-                    return;
                 }
 
                 this._hookListenerTask = Task.Run(() =>
